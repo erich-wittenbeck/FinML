@@ -2,6 +2,8 @@
 import collections
 import pandas as pd
 
+from numpy.random import choice
+
 from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
@@ -138,59 +140,50 @@ class Classifier():
     estimation_func = property(__get_estimation_func)
     classes = property(__get_classes)
 
-# Deprecated Code - kept around for future reference
+class StochasticModel():
 
-from collections import namedtuple
+    def __init__(self, name, threshold=1):
 
-# """ Arithmetic operators """
-#
-# add = namedtuple('add', 'left right')
-# sub = namedtuple('sub', 'left right')
-# mul = namedtuple('mul', 'left right')
-# div = namedtuple('div', 'left right')
-#
-# """ Comparative operators """
-#
-# eq = namedtuple('eq', 'left right')
-# lt = namedtuple('lt', 'left right')
-# gt = namedtuple('gt', 'left right')
-#
-# leq = namedtuple('leq', 'left right')
-# geq = namedtuple('geq', 'left right')
-#
-# """ Boolean operators """
-#
-# neg = namedtuple('neg', 'arg')
-# dis = namedtuple('dis', 'args')
-# con = namedtuple('con', 'args')
-#
-# """ Actions """
-#
-# buy = namedtuple('buy', 'how_much')
-# sell = namedtuple('sell', 'how_much')
-#
-# """ Nodes of decision tree"""
-#
-# class if_():
-#
-#     def __init__(self, *conds, then_='hold', else_='hold'):
-#         self.__conds = [*conds]
-#         self.__then = then_
-#         self.__else = else_
-#
-#     """ Getters """
-#
-#     def __get_conds(self):
-#         return self.__conds
-#
-#     def __get_then(self):
-#         return self.__then
-#
-#     def __get_else(self):
-#         return self.__else
-#
-#     """ Properties """
-#
-#     conds = property(__get_conds)
-#     then_ = property(__get_then)
-#     else_ = property(__get_else)
+        if threshold <= 0.5 or threshold > 1:
+            raise ValueError("threshold - value must be in (0.5, 1] but was " + str(threshold) + "!")
+
+        self.__name = name
+        self.__threshold = threshold
+
+        self.__distribution = {}
+
+    # Getters/Setters
+
+    def __get_name(self):
+
+        return self.__name
+
+    # Public methods
+
+    def determine_distribution(self, labels):
+
+        self.__distribution = labels.value_counts(True).to_dict()
+
+        return self
+
+    def predict(self, input):
+
+        X = input if type(input) in [pd.Series, pd.DataFrame] \
+            else input.X
+
+        index = X.index
+        pred_count = len(index)
+
+        keys = list(self.__distribution.keys())
+        probs = list(self.__distribution.values())
+
+        if probs[0] > self.__threshold:
+            predictions = [keys[0]]*pred_count
+        else:
+            predictions = choice(keys, pred_count, replace=True, p=probs)
+
+        return pd.Series(predictions, index)
+
+    # Properties
+
+    name = property(__get_name)

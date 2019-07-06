@@ -2,7 +2,7 @@
 import pandas as pd
 
 from lib.charts import Chart, Features, Indicator
-from lib.models import Strategy, Classifier
+from lib.models import Strategy, Classifier, StochasticModel
 from lib.evaluation import Evaluator
 from lib.simulation import Simulator
 
@@ -14,6 +14,7 @@ Indicator = Indicator
 Features = Features
 Strategy = Strategy
 Classifier = Classifier
+StochasticModel = StochasticModel
 Evaluator = Evaluator
 Simulator = Simulator
 
