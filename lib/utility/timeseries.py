@@ -1,4 +1,6 @@
 
+import numpy as np
+
 from datetime import datetime
 from lib.utility.datetime import map_str_to_datetime
 
@@ -33,22 +35,24 @@ def split_timeseries(df, *indices):
     if not all([type(idx) == type(indices[0]) for idx in indices]):
         raise TypeError('indices: All indices must be of same type!')
 
-    start_ends = []
-
-    timeline_start = df.index[0].to_pydatetime()
-    timeline_end = df.index[-1].to_pydatetime()
-
     if type(indices[0]) == int:
-        start_ends = [0] + list(indices) + [-1]
-    if type(indices[0]) == str:
-        start_ends = [timeline_start] + \
-                     [map_str_to_datetime(idx) for idx in indices] + \
-                     [timeline_end]
-    if type(indices[0]) == datetime:
-        start_ends = [timeline_start] + \
-                     list(indices) + \
-                     [timeline_end]
+        return np.split(df, list(indices))
+    elif type(indices[0]) == float:
+        return np.split(df, [int(index*len(df)) for index in indices])
+    else:
+        splitting_points = []
+        timeline_start = df.index[0].to_pydatetime()
+        timeline_end = df.index[-1].to_pydatetime()
 
-    start_ends = list(zip(start_ends, start_ends[1:]))
+        if type(indices[0]) == str:
+            splitting_points = [timeline_start] + \
+                         [map_str_to_datetime(idx) for idx in indices] + \
+                         [timeline_end]
+        if type(indices[0]) == datetime:
+            splitting_points = [timeline_start] + \
+                         list(indices) + \
+                         [timeline_end]
 
-    return tuple([slice_timeseries(df, start, end) for start, end in start_ends if start != end])
+        slicing_points = list(zip(splitting_points, splitting_points[1:]))
+
+        return tuple([slice_timeseries(df, start, end) for start, end in slicing_points if start != end])
