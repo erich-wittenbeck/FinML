@@ -5,30 +5,25 @@ from datetime import datetime
 from lib.utility.datetime import map_str_to_datetime
 
 def slice_timeseries(df, start, end=None):
-    df_slice = df
+    if (end is not None) and type(start) != type(end):
+        raise TypeError("end: end needs to be of the same type as start, but was " + str(type(end)) + ' instead of ' + str(type(start)))
 
-    indexer = start
     if type(start) == int:
-        if end == None:
-            df_slice = df_slice.iloc[indexer, :].to_frame().transpose()
-        else:
-            indexer = slice(indexer, end)
-            df_slice = df_slice.iloc[indexer, :]
-    elif type(start) == str:
-        indexer = map_str_to_datetime(indexer)
-        if end == None:
-            df_slice = df_slice.loc[indexer, :].to_frame().transpose()
-        else:
-            indexer = slice(indexer, map_str_to_datetime(end))
-            df_slice = df_slice.loc[indexer, :]
+        start_index = start
+        end_index = end if end is not None else -1
+    elif type(start) == float:
+        start_index = int(start*len(df))
+        end_index = int(end*len(df)) if end is not None else -1
     elif type(start) == datetime:
-        if end == None:
-            df_slice = df_slice.loc[indexer, :].to_frame().transpose()
-        else:
-            indexer = slice(indexer, end)
-            df_slice = df_slice.loc[indexer, :]
+        start_index = df.index.get_loc(start)
+        end_index = df.index.get_loc(end) if end is not None else -1
+    elif type(start) == str:
+        start_index = df.index.get_loc(map_str_to_datetime(start))
+        end_index = df.index.get_loc(map_str_to_datetime(end)) if end is not None else -1
+    else:
+        raise TypeError('start end: start and end must be int, float, str or date time, but were ' + str(type(start)) + ' and ' + str(type(end)) + ' instead!')
 
-    return df_slice
+    return df[start_index : end_index]
 
 
 def split_timeseries(df, *indices):
@@ -39,20 +34,9 @@ def split_timeseries(df, *indices):
         return np.split(df, list(indices))
     elif type(indices[0]) == float:
         return np.split(df, [int(index*len(df)) for index in indices])
+    elif type(indices[0]) == datetime:
+        return np.split(df, [df.index.get_loc(index) for index in indices])
+    elif type(indices[0]) == str:
+        return np.split(df, [df.index.get_loc(map_str_to_datetime(index)) for index in indices])
     else:
-        splitting_points = []
-        timeline_start = df.index[0].to_pydatetime()
-        timeline_end = df.index[-1].to_pydatetime()
-
-        if type(indices[0]) == str:
-            splitting_points = [timeline_start] + \
-                         [map_str_to_datetime(idx) for idx in indices] + \
-                         [timeline_end]
-        if type(indices[0]) == datetime:
-            splitting_points = [timeline_start] + \
-                         list(indices) + \
-                         [timeline_end]
-
-        slicing_points = list(zip(splitting_points, splitting_points[1:]))
-
-        return tuple([slice_timeseries(df, start, end) for start, end in slicing_points if start != end])
+        raise TypeError('indices: indices must be int, float, datetime or str, but were ' + str(type(indices[0])) + ' instead!')
