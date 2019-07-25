@@ -11,7 +11,7 @@ features = Features(history)\
 
 train_data, test_data = features.split('2017-09')
 
-stoch_model = StochasticModel('Fred', 0.51)\
+stoch_model = Stochastic('Fred', 0.51)\
             .determine_distribution(train_data.y)
 
 predictions = stoch_model.predict(test_data)

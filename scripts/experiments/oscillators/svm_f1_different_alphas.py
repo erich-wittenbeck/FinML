@@ -31,7 +31,7 @@ for alpha in alphas:
 
     train_data, test_data = feature_matrix.split('2017-09')
 
-    svm = Classifier('svm_alpha_'+str(alpha), 'svm') \
+    svm = Classification('svm_alpha_' + str(alpha), 'svm') \
         .set_hyper_parameters(kernel=['poly', 'rbf', 'sigmoid'],
                               gamma=[2 ** -13, 2 ** -8, 2 ** -5, 2 ** -3],
                               C=[2 ** 1, 2 ** 3, 2 ** 5, 2 ** 8, 2 ** 9]) \

@@ -16,13 +16,13 @@ hpo_metrics = {}
 
 # Actual classes
 
-class Strategy():
+class Manual():
 
-    def __init__(self, name, strategy, result_var='__signal__'):
+    def __init__(self, name, code, result_var='__signal__'):
 
         self.__name = name
         self.__result_var = result_var
-        self.__code = compile(strategy, '<string>', 'exec')
+        self.__code = compile(code, '<string>', 'exec')
 
     """ Getters """
 
@@ -50,7 +50,7 @@ class Strategy():
 
     name = property(__get_name)
 
-class Classifier():
+class Classification():
 
     def __init__(self, name, algorithm):
 
@@ -140,7 +140,7 @@ class Classifier():
     estimation_func = property(__get_estimation_func)
     classes = property(__get_classes)
 
-class StochasticModel():
+class Stochastic():
 
     def __init__(self, name, threshold=1):
 

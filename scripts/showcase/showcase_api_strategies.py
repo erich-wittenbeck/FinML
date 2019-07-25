@@ -18,7 +18,7 @@ feature_matrix = Features(history)\
 
 train_data, test_data = feature_matrix.split('2017-09')
 
-some_random_forest = Classifier('some_random_forest', 'randf') \
+some_random_forest = Classification('some_random_forest', 'randf') \
         .set_hyper_parameters(n_estimators=[100],
                               max_features=[1, 2, 3, 4],
                               bootstrap=[True, False]) \
@@ -43,7 +43,7 @@ else:
         __signal__ = 1
 """
 
-strat_rsi_macd_1 = Strategy('strat_rsi_macd_1', strat_rsi_macd_str)
+strat_rsi_macd_1 = Manual('strat_rsi_macd_1', strat_rsi_macd_str)
 
 simulator = Simulator()\
     .on_signal(3, 'buy', 0.5)\

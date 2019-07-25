@@ -40,7 +40,7 @@ for alpha in alphas:
 
     train_data, test_data = features.split('2017-09')
 
-    randf = Classifier('randf_alpha_' + str(alpha), 'randf') \
+    randf = Classification('randf_alpha_' + str(alpha), 'randf') \
         .set_hyper_parameters(n_estimators=[100],
                               max_features=[1, 2, 3, 4],
                               bootstrap=[True, False]) \

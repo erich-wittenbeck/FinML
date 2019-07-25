@@ -34,7 +34,7 @@ for alpha in alphas:
 
     train_data, test_data = feature_matrix.split('2017-09')
 
-    randf = Classifier('rndf_' + str(model_count), 'randf') \
+    randf = Classification('rndf_' + str(model_count), 'randf') \
         .set_hyper_parameters(n_estimators = [100],
                               max_features = [1,2,3,4],
                               bootstrap = [True, False]) \

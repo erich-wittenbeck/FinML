@@ -22,15 +22,15 @@ feature_matrix = api.Features(history)\
 
 train_data, test_data = feature_matrix.split('2018')
 
-svm_johnny = lib.models.Classifier('johnny', 'svm')\
+svm_johnny = lib.models.Classification('johnny', 'svm')\
     .set_hyper_parameters(kernel='poly', gamma=2 ** -8, C=64)\
     .train(train_data)
 
-svm_billy = lib.models.Classifier('billy', 'svm')\
+svm_billy = lib.models.Classification('billy', 'svm')\
     .set_hyper_parameters(kernel='rbf', gamma=2 ** -5, C=32)\
     .train(train_data)
 
-randf_bob = lib.models.Classifier('bob', 'randf')\
+randf_bob = lib.models.Classification('bob', 'randf')\
     .train(train_data)
 
 evaluator = api.Evaluator(test_data, svm_johnny, svm_billy, randf_bob) \
