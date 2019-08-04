@@ -16,10 +16,9 @@ def binary_labels(df, n, column='close'):
 def ternary_labels(df, n, buy_margin, sell_margin, column='close'):
     series = df[column]
 
-    return [1 if delta > buy_margin else -1 if delta < sell_margin*-1 else 0
-            for delta in [_percent_change(series[t], series[t + n])
-                          if t+n < len(series) else 0
-                          for t in range(len(series))]]
+    result = [1 if delta > buy_margin else -1 if delta < sell_margin*-1 else 0 for delta in [_percent_change(series[t], series[t + n]) if t+n < len(series) else 0 for t in range(len(series))]]
+
+    return result
 
 def quartary_labels(df, n, strong_buy_margin, strong_sell_margin, column='close'):
     series = df[column]

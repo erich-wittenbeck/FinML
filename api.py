@@ -22,13 +22,13 @@ class Metaparameters():
 
     def __init__(self, *args, **kwargs):
 
-        self.__iterables = args + (kwargs[k] for k in kwargs)
+        self.__iterables = list(args) + [kwargs[k] for k in kwargs]
 
     def __zip(self):
         return zip(*self.__iterables)
 
     def __product(self):
-        return product(self.__iterables)
+        return list(product(*self.__iterables))
 
     zipped = property(__zip)
     cartesian = property(__product)
