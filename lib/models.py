@@ -5,7 +5,7 @@ import pandas as pd
 from numpy.random import choice
 
 from sklearn.ensemble import RandomForestClassifier as RFC
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC
 
 # Built-Ins for ML models
@@ -96,11 +96,18 @@ class Classification():
 
         return self
 
-    def configure_hpo(self, scoring_metric, **hpo_configs):
+    def configure_hpo(self, hpo_method, scoring_metric, **hpo_configs):
 
         scoring = hpo_metrics[scoring_metric] \
             if scoring_metric in hpo_metrics \
             else scoring_metric
+
+        if hpo_method == 'exhaustive':
+            self.__hpo_method = GridSearchCV
+        elif hpo_method == 'random':
+            self.__hpo_method = RandomizedSearchCV
+        else:
+            raise ValueError("hpo_method: expected either 'exhaustive' or 'random' but was " + str(hpo_method))
 
         self.__hpo_config = {'scoring' : scoring, **hpo_configs}
 
@@ -113,7 +120,7 @@ class Classification():
         X = training_data.X[self.__features] if len(self.__features) > 0 else training_data.X
         y = training_data.y
 
-        self.__classifier = GridSearchCV(self.__algorithm(), self.__hyper_params, **self.__hpo_config)\
+        self.__classifier = self.__hpo_method(self.__algorithm(), self.__hyper_params, **self.__hpo_config)\
             if self.__use_hpo \
             else self.__algorithm(**self.__hyper_params)
 
