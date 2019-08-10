@@ -50,8 +50,8 @@ def williams_percent_range(df, lookback=14):
     low_values = df['low']
     close_values = df['close']
 
-    highest_highs = high_values.rolling(window=lookback, min_periods=0).max()
-    lowest_lows = low_values.rolling(window=lookback, min_periods=0).min()
+    highest_highs = high_values.rolling(window=lookback, min_periods=0).max().fillna(0)
+    lowest_lows = low_values.rolling(window=lookback, min_periods=0).min().fillna(0)
 
     wpr = (highest_highs - close_values)/(highest_highs - lowest_lows) * (-100)
 
@@ -100,8 +100,8 @@ def stochastic_oscillator(df, lookback_k=14, lookback_d=3):
     low_values = df['low']
     close_values = df['close']
 
-    highest_highs = high_values.rolling(window=lookback_k, min_periods=0).max()
-    lowest_lows = low_values.rolling(window=lookback_k, min_periods=0).min()
+    highest_highs = high_values.rolling(window=lookback_k, min_periods=0).max().fillna(0)
+    lowest_lows = low_values.rolling(window=lookback_k, min_periods=0).min().fillna(0)
 
     percent_k = sma(100 * (close_values - lowest_lows) / (highest_highs - lowest_lows), lookback_k)
     percent_d = sma(percent_k, lookback_d)

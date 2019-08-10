@@ -30,7 +30,17 @@ for history, margin in metaparams.cartesian:
 
     features = Features(history) \
         .label_data('ternary', 1, margin, margin)\
-        .add_features(macd, trix, adx, rsi, mfi, wpr, ao, uo, stoch, bbands, kltch)
+        .add_features(macd, trix, adx, rsi, mfi, wpr, ao, uo, stoch, bbands, kltch)\
+        .prune_features(5)
+
+    train_data, test_data = features.split(0.75)
+
+    randf = Classification('randf', 'randf')\
+        .set_hyper_parameters(n_estimators=[100],
+                              max_features=[1, 2, 3, 4],
+                              bootstrap=[True, False])\
+        .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2)\
+        .train(train_data)
 
     print(len(history.data), margin, margin)
 

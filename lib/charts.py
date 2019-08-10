@@ -226,6 +226,8 @@ class Features():
 
         self.__feature_matrix['labels'] = label_func(self.__chart, *args, **kwargs)
 
+        self.__feature_matrix['labels'].fillna(method='bfill')
+
         return self
 
     def smooth_chart(self, alpha, *chart_columns):
@@ -249,6 +251,8 @@ class Features():
                 self.__feature_matrix = self.__feature_matrix.assign(**{feature: chart[feature]})
             elif type(feature) == Indicator:
                 self.__feature_matrix = self.__feature_matrix.assign(**feature.compute(chart))
+
+        self.__feature_matrix.fillna(method='bfill', inplace=True)
 
         return self
 
