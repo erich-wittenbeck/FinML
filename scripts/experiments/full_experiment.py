@@ -22,6 +22,8 @@ stoch = Indicator('stoch', 'stoch_k', 'stoch_d')
 bbands = Indicator('bbands', 'bb_u', 'bb_m', 'bb_l')
 kltch = Indicator('kltch', 'klt_u', 'klt_m', 'klt_l')
 
+selected_features = {}
+
 metaparams = Metaparameters(histories=histories,
                             margins=[0.05, 0.025, 0.0125, 0.00625]
                             )
@@ -33,15 +35,23 @@ for history, margin in metaparams.cartesian:
         .add_features(macd, trix, adx, rsi, mfi, wpr, ao, uo, stoch, bbands, kltch)\
         .prune_features(5)
 
-    train_data, test_data = features.split(0.75)
+    for feature in features.X.columns:
+        if feature in selected_features:
+            selected_features[feature] += 1
+        else:
+            selected_features[feature] = 1
 
-    randf = Classification('randf', 'randf')\
-        .set_hyper_parameters(n_estimators=[100],
-                              max_features=[1, 2, 3, 4],
-                              bootstrap=[True, False])\
-        .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2)\
-        .train(train_data)
-
-    print(len(history.data), margin, margin)
+    # train_data, test_data = features.split(0.75)
+    #
+    # randf = Classification('randf', 'randf')\
+    #     .set_hyper_parameters(n_estimators=[100],
+    #                           max_features=[1, 2, 3, 4],
+    #                           bootstrap=[True, False])\
+    #     .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2)\
+    #     .train(train_data)
+    #
+    # print(len(history.data), margin, margin)
 
     # TODO the rest
+
+print(selected_features)
