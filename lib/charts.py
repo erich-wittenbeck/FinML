@@ -143,8 +143,8 @@ class Chart():
 
         return Chart(chart_slice)
 
-    def split(self, *indices):
-        chart_splits = split_timeseries(self.__data, *indices)
+    def split(self, chunk_size):
+        chart_splits = split_timeseries(self.__data, chunk_size)
 
         return tuple([Chart(split) for split in chart_splits])
 
@@ -315,11 +315,11 @@ class Features():
 
         return Features(chart_slice, feature_slice)
 
-    def split(self, *indices):
+    def split(self, chunk_size):
 
-        split_chart = split_timeseries(self.__chart, *indices)
+        split_chart = split_timeseries(self.__chart, chunk_size)
 
-        split_features = split_timeseries(self.__feature_matrix, *indices)
+        split_features = split_timeseries(self.__feature_matrix, chunk_size)
 
         return tuple([Features(chart_slice, features_slice) for chart_slice, features_slice in zip(split_chart, split_features)])
 

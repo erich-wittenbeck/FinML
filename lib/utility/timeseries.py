@@ -1,4 +1,5 @@
 
+import pandas as pd
 import numpy as np
 
 from datetime import datetime
@@ -26,17 +27,18 @@ def slice_timeseries(df, start, end=None):
     return df[start_index : end_index]
 
 
-def split_timeseries(df, *indices):
-    if not all([type(idx) == type(indices[0]) for idx in indices]):
-        raise TypeError('indices: All indices must be of same type!')
+def split_timeseries(df, chunk_size):
 
-    if type(indices[0]) == int:
-        return np.split(df, list(indices))
-    elif type(indices[0]) == float:
-        return np.split(df, [int(index*len(df)) for index in indices])
-    elif type(indices[0]) == datetime:
-        return np.split(df, [df.index.get_loc(index) for index in indices])
-    elif type(indices[0]) == str:
-        return np.split(df, [df.index.get_loc(map_str_to_datetime(index)) for index in indices])
+    if type(chunk_size) == str:
+        freq_str = \
+            'D' if chunk_size == 'day' else \
+                'W' if chunk_size == 'week' else \
+                    'M' if chunk_size == 'month' else \
+                        'Q' if chunk_size == 'quarter' else \
+                            'Y' if chunk_size == 'year' else \
+                                None
+        return [chunk for _, chunk in df.groupby(pd.Grouper(freq=freq_str))]
+    elif type(chunk_size) == int:
+        return np.array_split(df, chunk_size)
     else:
-        raise TypeError('indices: indices must be int, float, datetime or str, but were ' + str(type(indices[0])) + ' instead!')
+        raise TypeError()
