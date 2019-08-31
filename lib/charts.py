@@ -56,10 +56,6 @@ indicator_funcs = {'macd' : macd,
                    'fidx' : fidx,
                    'cmf' : cmf,
                    'adl' : adl}
-transformation_funcs = {'sum' : lambda s1, s2 : s1 + s2,
-                     'sub' : lambda s1, s2 : s1 - s2,
-                     'mul' : lambda s1, s2 : s1 * s2,
-                     'div' : lambda s1, s2 : s1 / s2}
 normalization_funcs = {'min_max' : min_max_norm}
 
 
@@ -341,16 +337,13 @@ class Features():
 
 class Indicator():
 
-    def __init__(self, func, *identifiers, **params):
+    def __init__(self, identifier, func, **params):
 
         self.__func = indicator_funcs[func] \
             if type(func) == str \
             else func
-        self.__identifiers = identifiers
+        self.__identifier = identifier
         self.__params = params
-
-        self.__transform_func = None
-        self.__transform_params = {}
 
         self.__scaling = None
         self.__alphas = {}
@@ -372,14 +365,6 @@ class Indicator():
 
         return self
 
-    def transform(self, transform_func, *identifiers, **transform_params):
-
-        self.__transform_func = transformation_funcs[transform_func] if type(transform_func) == str else transform_func
-        self.__identifiers = identifiers
-        self.__transform_params = transform_params
-
-        return self
-
     def compute(self, chart):
         df = chart
 
@@ -396,24 +381,7 @@ class Indicator():
             chart[[column]] = chart[[column]].apply(exs, args=(self.__alphas[column],))
 
         # Compute indicator
-        results = self.__func(df, **self.__params)
+        result = self.__func(df, **self.__params)
 
-        if type(results) == tuple:
-
-            # Transform indicator
-            if self.__transform_func is not None:
-                results = (self.__transform_func(*results, **self.__transform_params), )
-
-            if len(self.__identifiers) != len(results):
-                raise ValueError("Number of identifiers and number of resulting series must be equal! But were "
-                                 + str(len(self.__identifiers)) + " and " + str(len(results)) + " instead!")
-
-            return dict([(identifier, series) for identifier, series in zip(self.__identifiers, results)])
-        else:
-
-            # Transform indicator
-            if self.__transform_func is not None:
-                results = self.__transform_func(results, **self.__transform_params)
-
-            identifier, = self.__identifiers
-            return {identifier: results}
+        identifier = self.__identifier
+        return {identifier: result}

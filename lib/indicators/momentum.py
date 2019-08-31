@@ -16,7 +16,7 @@ def moving_average_convergence_divergence(df, column='close', short=12, long=26,
     main_line = short_ema - long_ema
     signal_line = ema(main_line, average)
 
-    return (main_line, signal_line)
+    return signal_line - main_line
 
 def triple_exponential_moving_average(df, column='close', lookback_trix=14, lookback_signal=9):
 
@@ -30,7 +30,7 @@ def triple_exponential_moving_average(df, column='close', lookback_trix=14, look
     trix = 100 * (triple_ema - triple_ema_prev)/(triple_ema_prev)
     signal = ema(trix, lookback_signal)
 
-    return (trix, signal)
+    return signal - trix
 
 def average_directional_index(df, lookback=14):
 
@@ -81,11 +81,11 @@ def vortex_indicator(df, lookback=14):
     c = (low_values - prev_close_values).abs()
 
     true_ranges = pd.concat([a, b, c], axis=1).max(axis=1)
-    tr_sum = true_ranges.rolling(window=lookback, min_periods=0).sum(0).fillna(0)
+    tr_sum = true_ranges.rolling(window=lookback, min_periods=0).sum().fillna(0)
 
     # Vortex indicator through normalizing vortex movements
 
     plus_vi = plus_vm_sum/tr_sum
     minus_vi = minus_vm_sum/tr_sum
 
-    return (plus_vi, minus_vi)
+    return plus_vi - minus_vi

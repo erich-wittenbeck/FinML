@@ -95,7 +95,7 @@ def ultimate_oscillator(df, short=7, medium=14, long=28):
 
     return uo
 
-def stochastic_oscillator(df, lookback_k=14, lookback_d=3):
+def stochastic_oscillator(df, lookback_k=14, lookback_d=3, return_as='k'):
     high_values = df['high']
     low_values = df['low']
     close_values = df['close']
@@ -106,4 +106,9 @@ def stochastic_oscillator(df, lookback_k=14, lookback_d=3):
     percent_k = sma(100 * (close_values - lowest_lows) / (highest_highs - lowest_lows), lookback_k)
     percent_d = sma(percent_k, lookback_d)
 
-    return (percent_k, percent_d)
+    if return_as == 'k':
+        return percent_k
+    elif return_as == 'd':
+        return percent_d
+    else:
+        raise ValueError("return_as: expected to be either 'k' or 'd', but was " + str(return_as) + " instead!")

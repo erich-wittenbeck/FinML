@@ -31,11 +31,11 @@ def mass_index(df, short=9, long=25):
 
     ema_div = ema_single/ema_double
 
-    midx = ema_div.rolling(window=long, min_periods=0).fillna(0)
+    midx = ema_div.rolling(window=long, min_periods=0).sum().fillna(0)
 
     return midx
 
-def bollinger_bands(df, column='close', lookback=14):
+def bollinger_bands(df, column='close', lookback=14, return_as='total_delta'):
 
     values = df[column]
 
@@ -47,9 +47,16 @@ def bollinger_bands(df, column='close', lookback=14):
     uband = (mband + sdevs).fillna(mband.iloc[0])
     lband = (mband - sdevs).fillna(mband.iloc[0])
 
-    return (uband, mband, lband)
+    if return_as == 'total_delta':
+        return uband - lband
+    elif return_as == 'upper_delta':
+        return uband - mband
+    elif return_as == 'lower_delta':
+        return mband - lband
+    else:
+        raise ValueError("return_as: expected to be either 'total_delta', 'upper_delta' or 'lower_delta', but was " + str(return_as) + " instead!")
 
-def keltner_channel(df, column='close', lookback=14):
+def keltner_channel(df, column='close', lookback=14, return_as='total_delta'):
 
     values = df[column]
 
@@ -59,4 +66,11 @@ def keltner_channel(df, column='close', lookback=14):
     uband = mband + double_atr
     lband = mband - double_atr
 
-    return (uband, mband, lband)
+    if return_as == 'total_delta':
+        return uband - lband
+    elif return_as == 'upper_delta':
+        return uband - mband
+    elif return_as == 'lower_delta':
+        return mband - lband
+    else:
+        raise ValueError("return_as: expected to be either 'total_delta', 'upper_delta' or 'lower_delta', but was " + str(return_as) + " instead!")
