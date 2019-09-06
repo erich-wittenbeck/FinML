@@ -37,7 +37,8 @@ for span in spans:
     increment = 1/len(matrices)
 
     for matrix in matrices:
-        matrix.prune_features(5)
+        matrix.standardize()\
+              .prune_features(5)
 
         for feature in matrix.X.columns:
             selected_features[feature][span] += increment

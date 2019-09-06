@@ -37,8 +37,12 @@ def split_timeseries(df, chunk_size):
                         'Q' if chunk_size == 'quarter' else \
                             'Y' if chunk_size == 'year' else \
                                 None
-        return [chunk for _, chunk in df.groupby(pd.Grouper(freq=freq_str))]
+        return tuple(chunk for _, chunk in df.groupby(pd.Grouper(freq=freq_str)))
     elif type(chunk_size) == int:
-        return np.array_split(df, chunk_size)
+        return tuple(np.array_split(df, chunk_size))
+    elif type(chunk_size) == float:
+        splitting_point = int(chunk_size*len(df))
+
+        return (df.iloc[:splitting_point], df.iloc[splitting_point:])
     else:
         raise TypeError()

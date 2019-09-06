@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.preprocessing import StandardScaler
 
 from lib.indicators.momentum import \
     moving_average_convergence_divergence as macd, \
@@ -56,7 +57,6 @@ indicator_funcs = {'macd' : macd,
                    'fidx' : fidx,
                    'cmf' : cmf,
                    'adl' : adl}
-normalization_funcs = {'min_max' : min_max_norm}
 
 
 class Chart():
@@ -198,7 +198,14 @@ class Features():
             self.__feature_matrix = pd.DataFrame(index=self.__chart.index.copy(), columns=['labels'])
         else:
             self.__feature_matrix = feature_matrix
+
         self.__alphas = {}
+
+        self.__means = None
+        self.__vars = None
+
+        self.__mins = None
+        self.__maxs = None
 
 
     # Getters
@@ -211,6 +218,12 @@ class Features():
 
     def __get_y(self):
         return self.__feature_matrix['labels']
+
+    def __get_dist(self):
+        return self.__means, self.__vars
+
+    def __get_min_max(self):
+        return self.__mins, self.__maxs
 
     # Public access points for adding labels and features
 
@@ -263,17 +276,47 @@ class Features():
 
         return self
 
-    def normalize_features(self, with_func, normalize_which, *args, **kwargs):
+    # Feature transformation
 
-        normalization_func = normalization_funcs[with_func] \
-            if type(with_func) == str \
-            else with_func
+    def standardize(self, with_params_of=None):
+        X = self.__get_X()
+        features = X.columns
 
-        columns = [normalize_which] if type(normalize_which) == str else list(normalize_which)
+        if with_params_of is None:
 
-        self.__feature_matrix[columns] = self.__feature_matrix[columns].apply(func=normalization_func, args=args, **kwargs)
+            self.__means, self.__vars = X.mean(), X.std()
+        else:
+            self.__means, self.__vars = with_params_of.dist
+
+        self.__feature_matrix[features] = ((X - self.__means)/self.__vars).fillna(0)
 
         return self
+
+    def normalize(self, with_params_of):
+        X = self.__get_X()
+        features = X.columns
+
+        if with_params_of is None:
+            self.__mins, self.__maxs = X.min(), X.max()
+        else:
+            self.__mins, self.__maxs = with_params_of.minmax
+
+        self.__feature_matrix[features] = ((X - self.__mins)/(self.__maxs - self.__mins)).fillna(0)
+
+        return self
+
+    def rolling_window(self, offset, periods, *features):
+
+        to_be_shifted = self.__get_X()[list(features)] if features != () else self.__get_X()
+
+        shifted = [to_be_shifted.shift(i, axis=0).fillna(0).rename(mapper=lambda s: s + "__" + "t-" + str(i), axis='columns')
+                   for i in range(offset+1, offset+periods+1)]
+
+        self.__feature_matrix = pd.concat([self.__feature_matrix, *shifted], axis=1)
+
+        return self
+
+    # Feature selection
 
     def prune_features(self, k, score_func=f_classif): # TODO Use built_in string!
 
@@ -286,18 +329,6 @@ class Features():
         X = X[X.columns[mask]]
 
         self.__feature_matrix = pd.concat([X, y], axis=1)
-
-        return self
-
-
-    def rolling_window(self, offset, periods, *features):
-
-        to_be_shifted = self.__get_X()[list(features)] if features != () else self.__get_X()
-
-        shifted = [to_be_shifted.shift(i, axis=0).fillna(0).rename(mapper=lambda s: s + "__" + "t-" + str(i), axis='columns')
-                   for i in range(offset+1, offset+periods+1)]
-
-        self.__feature_matrix = pd.concat([self.__feature_matrix, *shifted], axis=1)
 
         return self
 
@@ -333,6 +364,8 @@ class Features():
     chart = property(__get_chart)
     X = property(__get_X)
     y = property(__get_y)
+    dist = property(__get_dist)
+    minmax = property(__get_min_max)
 
 
 class Indicator():
