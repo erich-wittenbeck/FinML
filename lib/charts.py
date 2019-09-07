@@ -225,6 +225,17 @@ class Features():
 
         return self
 
+    def add_chart_columns(self, *columns, smooth_with_alpha=None):
+        list_of_columns = list(columns)
+        chart = self.__chart[list_of_columns]
+
+        if smooth_with_alpha is not None:
+            chart = chart.ewm(alpha=smooth_with_alpha, axis=1).mean()
+
+        self.__feature_matrix[list_of_columns] = chart
+
+        return self
+
     def add_indicators(self, *indicator, smooth_chart_columns=None, alpha=1):
 
         chart = self.__chart.copy()
