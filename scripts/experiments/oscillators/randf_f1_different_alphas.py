@@ -29,7 +29,7 @@ for alpha in alphas:
     feature_matrix = Features(history) \
         .smooth_chart(alpha, 'open', 'close', 'high', 'low')\
         .label_data('ternary', 1, 0.0025, 0.0025) \
-        .add_features(rsi, mfi, uo, stoch)\
+        .add_indicators(rsi, mfi, uo, stoch)\
         .normalize_features(lambda x: x / 100, ('rsi', 'mfi', 'uo', 'stoch'))
 
     train_data, test_data = feature_matrix.split('2017-09')

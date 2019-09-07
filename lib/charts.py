@@ -1,9 +1,7 @@
 
-import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.preprocessing import StandardScaler
 
 from lib.indicators.momentum import \
     moving_average_convergence_divergence as macd, \
@@ -30,7 +28,6 @@ from lib.indicators.volume import \
 
 from lib.utility.labeling import *
 from lib.utility.timeseries import *
-from lib.utility.statistics import exponential_smoothing as exs, min_max_norm
 from lib.utility.visualization import plot_candlesticks
 
 
@@ -116,14 +113,6 @@ class Chart():
 
         return self
 
-    def smooth(self, alpha, *columns):
-        chart = self.__data
-        chart[list(columns)] = chart[list(columns)].apply(exs, args=(alpha,))
-
-        self.__data = chart
-
-        return self
-
     # Generatvie functions
 
     def shuffle(self, how_many=1, with_replacement=False):
@@ -199,14 +188,11 @@ class Features():
         else:
             self.__feature_matrix = feature_matrix
 
-        self.__alphas = {}
-
         self.__means = None
         self.__vars = None
 
         self.__mins = None
         self.__maxs = None
-
 
     # Getters
 
@@ -239,27 +225,17 @@ class Features():
 
         return self
 
-    def smooth_chart(self, alpha, *chart_columns):
+    def add_indicators(self, *indicator, smooth_chart_columns=None, alpha=1):
 
-        for chart_column in chart_columns:
-            self.__alphas[chart_column] = alpha
+        chart = self.__chart.copy()
 
-        return self
-
-    def add_features(self, *features):
-
-        chart = self.__chart
-
-        for column in self.__alphas:
-            chart[column] = chart[[column]].apply(exs, args=(self.__alphas[column],))
+        if smooth_chart_columns is not None:
+            chart[smooth_chart_columns] = chart[smooth_chart_columns].ewm(alpha=alpha, axis=1).mean()
 
         # TODO: Optimize!
 
-        for feature in features:
-            if type(feature) == str:
-                self.__feature_matrix = self.__feature_matrix.assign(**{feature: chart[feature]})
-            elif type(feature) == Indicator:
-                self.__feature_matrix = self.__feature_matrix.assign(**feature.compute(chart))
+        for feature in indicator:
+            self.__feature_matrix = self.__feature_matrix.assign(**feature(chart))
 
         self.__feature_matrix.fillna(method='bfill', inplace=True)
 
@@ -372,49 +348,45 @@ class Indicator():
 
     def __init__(self, identifier, func, **params):
 
-        self.__func = indicator_funcs[func] \
+        func = indicator_funcs[func] \
             if type(func) == str \
             else func
         self.__identifier = identifier
-        self.__params = params
+        self.__func = lambda chart: func(chart, **params)
 
-        self.__scaling = None
-        self.__alphas = {}
+    def __call__(self, chart):
+        result = self.__func(chart)
 
-    def __add_to_dict(self, dictionary, value, *keys):
-
-        for key in keys:
-            dictionary[key] = value
+        identifier = self.__identifier
+        return {identifier: result}
 
     def rescale(self, scaling):
 
-        self.__scaling = scaling
+        old_func = self.__func
+
+        def new_func(chart):
+            scaled_chart = chart.resample(scaling) \
+                        .agg({'open': 'first',
+                              'close': 'last',
+                              'high': 'max',
+                              'low': 'min',
+                              'volume': 'sum'})
+
+            return old_func(scaled_chart)
+
+        self.__func = new_func
 
         return self
 
     def smooth_chart(self, alpha, *chart_columns):
 
-        self.__add_to_dict(self.__alphas, alpha, *chart_columns)
+        old_func = self.__func
+
+        def new_func(chart):
+            chart[list(chart_columns)] = chart[list(chart_columns)].ewm(alpha=alpha, axis=1).mean()
+
+            return old_func(chart)
+
+        self.__func = new_func
 
         return self
-
-    def compute(self, chart):
-        df = chart
-
-        # Apply upscaling and smoothing
-        if self.__scaling is not None:
-            df = df.resample(self.__scaling) \
-                .agg({'open': 'first',
-                      'close': 'last',
-                      'high': 'max',
-                      'low': 'min',
-                      'volume': 'sum'})
-
-        for column in self.__alphas:
-            chart[[column]] = chart[[column]].apply(exs, args=(self.__alphas[column],))
-
-        # Compute indicator
-        result = self.__func(df, **self.__params)
-
-        identifier = self.__identifier
-        return {identifier: result}
