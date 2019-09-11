@@ -1,3 +1,4 @@
+
 from api import *
 
 history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
@@ -43,4 +44,6 @@ for span in spans:
         for feature in matrix.X.columns:
             selected_features[feature][span] += increment
 
-print(selected_features)
+table = pd.DataFrame(selected_features).T[spans].to_latex()
+
+print(table)
