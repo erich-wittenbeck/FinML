@@ -45,6 +45,6 @@ for span in spans:
         for feature in matrix.X.columns:
             selected_features[feature][span] += increment
 
-table = pd.DataFrame(selected_features).T[spans].to_latex()
+table = pd.DataFrame(selected_features).T[spans].to_latex(buf='/home/files/output/latex/feature_selection_univariate.txt')
 
-print(table)
+print('finish!')
