@@ -1,7 +1,8 @@
 
 from api import *
 
-history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
+#history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
+history = Chart('home/files/charts/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
     .upscale('60min')
 
