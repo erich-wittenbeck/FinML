@@ -6,6 +6,7 @@ from numpy.random import choice
 
 from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.feature_selection import RFE
 from sklearn.svm import SVC
 
 # Built-Ins for ML models
@@ -84,6 +85,9 @@ class Classification():
         else:
             raise TypeError('Classifier is expected to provide either decision_function or predict_proba as attributes!')
 
+    def __get_features(self):
+        return list(self.__features)
+
     def __get_classes(self):
         return self.__classifier.classes_
 
@@ -113,18 +117,46 @@ class Classification():
 
         return self
 
-    def train(self, training_data, *features):
+    def train(self, training_data, *features, prune_features=False, k=None):
 
-        self.__features = list(features)
+        X, y = training_data.X, training_data.y
 
-        X = training_data.X[self.__features] if len(self.__features) > 0 else training_data.X
-        y = training_data.y
+        if not prune_features and len(features) > 0:
+            X = X[list(features)]
 
-        self.__classifier = self.__hpo_method(self.__algorithm(), self.__hyper_params, **self.__hpo_config)\
-            if self.__use_hpo \
-            else self.__algorithm(**self.__hyper_params)
+        algorithm = self.__algorithm
+        hyper_params = self.__hyper_params
 
-        self.__classifier.fit(X, y)
+        if self.__use_hpo:
+
+            if prune_features:
+                hyper_params = {'estimator__' + key: hyper_params[key] for key in hyper_params}
+                rfe = RFE(algorithm(), k)
+
+                gridsearch = self.__hpo_method(rfe, hyper_params, **self.__hpo_config)
+                gridsearch.fit(X, y)
+
+                best_rfe = gridsearch.best_estimator_
+
+                self.__classifier = best_rfe.estimator_
+                self.__features = X[X.columns[best_rfe.support_]].columns
+            else:
+                gridsearch = self.__hpo_method(algorithm(), hyper_params, **self.__hpo_config)
+
+                self.__classifier = gridsearch.best_estimator_
+                self.__features = X.columns
+        else:
+            if prune_features:
+                rfe = RFE(algorithm(**hyper_params), k)
+                rfe.fit(X, y)
+
+                self.__classifier = rfe.estimator_
+                self.__features = X[X.columns[rfe.support_]].columns
+            else:
+                self.__classifier = algorithm(**hyper_params)
+                self.__classifier.fit(X, y)
+
+                self.__features = X.columns
 
         return self
 
@@ -133,7 +165,7 @@ class Classification():
         X = input if type(input) in [pd.Series, pd.DataFrame] \
             else input.X
 
-        if self.__features:
+        if len(self.__features) > 0:
             X = X[self.__features]
 
         predictions = self.__classifier.predict(X)
@@ -145,6 +177,7 @@ class Classification():
     name = property(__get_name)
     params = property(__get_params)
     estimation_func = property(__get_estimation_func)
+    features = property(__get_features)
     classes = property(__get_classes)
 
 class Stochastic():
