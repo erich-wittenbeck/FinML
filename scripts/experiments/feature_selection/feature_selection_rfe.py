@@ -1,7 +1,8 @@
 
 from api import *
 
-history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
+#history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
+history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
     .upscale('60min')\
     .slice('2012', '2014')
@@ -31,7 +32,7 @@ features = Features(history) \
                         Indicator('cmf', 'cmf'),
                         Indicator('adl', 'adl'))
 
-spans = ['year']#, 'quarter', 'month', 'week']
+spans = ['year', 'quarter', 'month', 'week']#]
 selected_features = {feature: {span: 0 for span in spans} for feature in features.X.columns}
 
 for span in spans:
@@ -53,6 +54,6 @@ for span in spans:
         for feature in randf.features:
             selected_features[feature][span] += increment
 
-table = pd.DataFrame(selected_features).T[spans].to_latex()
+table = pd.DataFrame(selected_features).T[spans].to_latex(buf='/home/files/output/latex/feature_selection_rfe_randf.txt')
 
-print(table)
+print('finish!')
