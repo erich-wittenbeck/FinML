@@ -46,7 +46,7 @@ for span in spans:
         randf = Classification('randf', 'randf')\
                     .set_hyper_parameters(n_estimators = [100],
                                           bootstrap = [True])\
-                    .configure_hpo('exhaustive', 'f1_macro', n_jobs=6, verbose=2) \
+                    .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2) \
                     .train(training_data, prune_features=True, k=5)
 
         predictions = randf.predict(test_data)
