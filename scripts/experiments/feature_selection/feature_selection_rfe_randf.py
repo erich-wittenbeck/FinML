@@ -5,7 +5,6 @@ from api import *
 history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
     .upscale('60min')\
-    .slice('2012', '2014')
 
 features = Features(history) \
         .label_data('ternary', 1, 0, 0)\
@@ -32,7 +31,7 @@ features = Features(history) \
                         Indicator('cmf', 'cmf'),
                         Indicator('adl', 'adl'))
 
-spans = ['year', 'quarter', 'month', 'week']#]
+spans = ['year', 'quarter', 'month', 'week']#
 selected_features = {feature: {span: 0 for span in spans} for feature in features.X.columns}
 
 for span in spans:
@@ -47,7 +46,7 @@ for span in spans:
                     .set_hyper_parameters(n_estimators = [100],
                                           bootstrap = [True])\
                     .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2) \
-                    .train(training_data, prune_features=True, k=5)
+                    .train(training_data, prune_features=True, rfe_scoring='f1_macro')
 
         predictions = randf.predict(test_data)
 
@@ -56,4 +55,4 @@ for span in spans:
 
 table = pd.DataFrame(selected_features).T[spans].to_latex(buf='/home/files/output/latex/feature_selection_rfe_randf.txt')
 
-print('finish!')
+print(table)

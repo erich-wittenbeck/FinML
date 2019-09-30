@@ -6,7 +6,7 @@ from numpy.random import choice
 
 from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import RFE, RFECV
 from sklearn.svm import SVC
 
 # Built-Ins for ML models
@@ -117,7 +117,7 @@ class Classification():
 
         return self
 
-    def train(self, training_data, *features, prune_features=False, k=None):
+    def train(self, training_data, *features, prune_features=False, k=None, rfe_folds=None, rfe_scoring=None):
 
         X, y = training_data.X, training_data.y
 
@@ -131,7 +131,7 @@ class Classification():
 
             if prune_features:
                 hyper_params = {'estimator__' + key: hyper_params[key] for key in hyper_params}
-                rfe = RFE(algorithm(), k)
+                rfe = RFE(algorithm(), k) if k is not None else RFECV(algorithm(), cv=rfe_folds, scoring=self.__hpo_config['scoring'])
 
                 gridsearch = self.__hpo_method(rfe, hyper_params, **self.__hpo_config)
                 gridsearch.fit(X, y)
@@ -142,12 +142,13 @@ class Classification():
                 self.__features = X[X.columns[best_rfe.support_]].columns
             else:
                 gridsearch = self.__hpo_method(algorithm(), hyper_params, **self.__hpo_config)
+                gridsearch.fit(X, y)
 
                 self.__classifier = gridsearch.best_estimator_
                 self.__features = X.columns
         else:
             if prune_features:
-                rfe = RFE(algorithm(**hyper_params), k)
+                rfe = RFE(algorithm(**hyper_params), k) if k is not None else RFECV(algorithm(), cv=rfe_folds, scoring=rfe_scoring)
                 rfe.fit(X, y)
 
                 self.__classifier = rfe.estimator_
