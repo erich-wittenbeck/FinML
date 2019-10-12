@@ -4,7 +4,7 @@ import pandas as pd
 from lib.indicators.moving_averages import exponential_moving_average as ema
 from lib.indicators.volatility import average_true_range as atr
 
-def moving_average_convergence_divergence(df, column='close', short=12, long=26, average=9):
+def moving_average_convergence_divergence(df, column='close', short=12, long=26, average=9, return_as='delta'):
 
     values = df[column]
 
@@ -16,7 +16,12 @@ def moving_average_convergence_divergence(df, column='close', short=12, long=26,
     main_line = short_ema - long_ema
     signal_line = ema(main_line, average)
 
-    return signal_line - main_line
+    if return_as == 'delta':
+        return signal_line - main_line
+    elif return_as == 'main':
+        return main_line
+    else:
+        return signal_line
 
 def triple_exponential_moving_average(df, column='close', lookback_trix=14, lookback_signal=9):
 
