@@ -63,13 +63,10 @@ for span in spans:
 
     plt.pcolormesh(df, edgecolor='black', linewidths=0.1, cmap='bwr', alpha=0.75)
     plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
-    plt.xticks(range(1, len(df.columns)+1), df.columns)
 
-    ilocs, labels = plt.xticks()
-
-    for iloc, label in zip(ilocs, labels):
-        if iloc % n[span] != 0:
-            label.set_visible(False)
+    xticks = [pos for pos in range(1, len(df.columns)+1) if pos %n[span] == 0]
+    labels = [df.columns[xtick-1] for xtick in xticks]
+    plt.xticks(xticks, labels)
 
     plt.show()
     plt.clf()
