@@ -305,13 +305,24 @@ class Features():
 
     # Feature selection
 
-    def prune_features(self, k, score_func=f_classif): # TODO Use built_in string!
+    def prune_features(self, n, score_func=f_classif): # TODO Use built_in string!
 
         X = self.__get_X()
         y = self.__get_y()
 
-        best_k_selector = SelectKBest(score_func, k).fit(X, y)
-        mask = best_k_selector.get_support()
+        mask = []
+
+        if type(n) == int:
+            k = n
+            best_k_selector = SelectKBest(score_func, k).fit(X, y)
+            mask = best_k_selector.get_support()
+        elif type(n) == str:
+            best_k_selector = SelectKBest(score_func, 'all').fit(X, y)
+            feature_scores = best_k_selector.scores_
+            baseline_score = feature_scores[X.columns.get_loc(n)]
+            mask = [True if feature_scores[i] > baseline_score else False for i in range(len(feature_scores))]
+        else:
+            raise TypeError('prune_features: expected n to be int or str but was ' + str(type(n)))
 
         X = X[X.columns[mask]]
 

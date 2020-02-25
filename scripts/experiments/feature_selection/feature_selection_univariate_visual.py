@@ -1,5 +1,6 @@
 
 from api import *
+from lib.indicators.dummy import random_standard_variable as baseline
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -32,7 +33,8 @@ features = Features(history) \
                         Indicator('obv', 'obv'),
                         Indicator('fidx', 'fidx'),
                         Indicator('cmf', 'cmf'),
-                        Indicator('adl', 'adl'))
+                        Indicator('adl', 'adl'),
+                        Indicator('baseline', baseline))
 
 spans = ['year', 'quarter', 'month', 'week']
 n = {'year': 1, 'quarter': 4, 'month': 12, 'week': 52}
@@ -46,7 +48,7 @@ for span in spans:
 
     for matrix in matrices:
         matrix.standardize()\
-              .prune_features(5)
+              .prune_features('baseline')
 
         selected_features = matrix.X.columns
 
