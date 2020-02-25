@@ -8,10 +8,12 @@ from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression as LogReg
 
 # Built-Ins for ML models
 
 ml_algos = {'svm' : SVC,
+            'logreg' : LogReg,
             'randf' : RFC}
 hpo_metrics = {}
 
