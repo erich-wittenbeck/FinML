@@ -46,7 +46,7 @@ for span in spans:
         try:
             logreg = Classification('logreg', 'logreg')\
                 .set_hyper_parameters(C=[10**exp for exp in range(-6, 4)]) \
-                .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2) \
+                .configure_hpo('exhaustive', 'f1_macro', n_jobs=6, verbose=2) \
                 .train(training_data, prune_features=True, rfe_scoring='f1_macro')
 
             predictions = logreg.predict(test_data)
