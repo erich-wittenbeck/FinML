@@ -56,6 +56,6 @@ for span in spans:
         except ValueError:
             pass
 
-table = pd.DataFrame(selected_features).T[spans].to_latex(buf='/home/files/output/latex/feature_selection_rfe_randf.txt')
+table = pd.DataFrame(selected_features).T[spans].to_latex(buf='/home/files/output/latex/feature_selection_rfe_logreg.txt')
 
 print(table)
