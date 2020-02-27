@@ -1,10 +1,10 @@
 
 from api import *
 
-#history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
-history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
+#history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
+history = Chart('C:/Users/User/Desktop/darmstadt/Master-Thesis/Data/Histories/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
-    .upscale('60min')\
+    .upscale('60min')
 
 features = Features(history) \
         .label_data('ternary', 1, 0, 0)\
@@ -41,6 +41,7 @@ for span in spans:
     for matrix in matrices:
         training_data, test_data = matrix.split(0.75)
         training_data.standardize()
+        test_data.standardize(training_data)
 
         randf = Classification('randf', 'randf')\
                     .set_hyper_parameters(n_estimators = [100],
