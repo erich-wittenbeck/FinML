@@ -80,5 +80,4 @@ for span in spans:
 
     plt.title(span + 's')
     plt.savefig('/home/files/output/png/logreg/feature_selection_rfe_logreg_'+span+'s.png', dpi=300, bbox_inches="tight")
-    plt.show()
     plt.clf()
