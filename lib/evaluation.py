@@ -41,7 +41,8 @@ class Evaluator():
 
     def __create_roc_curves(self, model, X, y):
         classes = model.classes
-        scores = model.estimation_func(X)
+        features = model.features
+        scores = model.estimation_func(X[features])
 
         roc_dict = {}
 

@@ -2,6 +2,7 @@
 import collections
 import pandas as pd
 
+from numpy import array
 from numpy.random import choice
 
 from sklearn.ensemble import RandomForestClassifier as RFC
@@ -179,21 +180,21 @@ class Classification():
 
     name = property(__get_name)
     params = property(__get_params)
-    estimation_func = property(__get_estimation_func)
-    features = property(__get_features)
     classes = property(__get_classes)
+    features = property(__get_features)
+    estimation_func = property(__get_estimation_func)
 
 class Stochastic():
 
-    def __init__(self, name, threshold=1):
-
-        if threshold <= 0.5 or threshold > 1:
-            raise ValueError("threshold - value must be in (0.5, 1] but was " + str(threshold) + "!")
-
-        self.__name = name
-        self.__threshold = threshold
+    def __init__(self, name):
 
         self.__distribution = {}
+
+        self.__name = name
+        self.__threshold = 1
+        self.__classes = []
+        self.__features = []
+        self.__estimation_func = lambda x: x
 
     # Getters/Setters
 
@@ -201,11 +202,43 @@ class Stochastic():
 
         return self.__name
 
+    def __get_params(self):
+
+        return {'threshold': self.__threshold}
+
+    def __get_classes(self):
+
+        return self.__classes
+
+    def __get_features(self):
+
+        return self.__features
+
+    def __get_estimation_func(self):
+
+        return self.__estimation_func
+
+
     # Public methods
 
-    def determine_distribution(self, labels):
+    def determine_distribution(self, train_data, threshold=1):
 
-        self.__distribution = labels.value_counts(True).to_dict()
+        if threshold <= 0.5 or threshold > 1:
+            raise ValueError("threshold - value must be in (0.5, 1] but was " + str(threshold) + "!")
+
+        self.__distribution = train_data.y.value_counts(True).to_dict()
+
+        self.__threshold = threshold
+        self.__classes = self.__distribution.keys()
+        self.__features = train_data.X.columns
+
+        def predict_proba(data):
+            n_samples = len(data.index)
+
+            return array([[self.__distribution[label]]*n_samples for label in self.__classes]).T
+
+        self.__estimation_func = predict_proba
+
 
         return self
 
@@ -230,3 +263,7 @@ class Stochastic():
     # Properties
 
     name = property(__get_name)
+    params = property(__get_params)
+    classes = property(__get_classes)
+    features = property(__get_features)
+    estimation_func = property(__get_estimation_func)
