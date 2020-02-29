@@ -67,7 +67,7 @@ for span in spans:
         evaluator = Evaluator()\
             .evaluate(test_data, randf, baseline, evaluations=['reports'])
 
-        for model in [randf, baseline]:
+        for model in [logreg, randf, baseline]:
             identifier = model.name
             f1_scores[identifier] += [evaluator.reports[identifier]['macro avg']['f1-score']]
 
