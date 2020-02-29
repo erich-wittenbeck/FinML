@@ -39,8 +39,10 @@ features = Features(history) \
 spans = ['year', 'quarter', 'month']
 n = {'year': 1, 'quarter': 4, 'month': 12}
 
+labels = ['-1', '0', '1']
+
 for span in spans:
-    auc_timelines = {identifier: [] for identifier in ['logreg', 'randf', 'stochastic']}
+    auc_timelines = {label: {identifier: [] for identifier in ['logreg', 'randf', 'stochastic']} for label in labels}
     date_times = []
 
     matrices = features.split(span)
@@ -50,26 +52,45 @@ for span in spans:
         training_data.standardize()
         test_data.standardize(training_data)
 
-        logreg = Classification('logreg', 'logreg') \
-            .set_hyper_parameters(C=[10 ** exp for exp in range(-1, 2)]) \
-            .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2) \
+        # logreg = Classification('logreg', 'logreg') \
+        #     .set_hyper_parameters(C=[10 ** exp for exp in range(-1, 2)]) \
+        #     .configure_hpo('exhaustive', 'f1_macro', n_jobs=3, verbose=2) \
+        #     .train(training_data, prune_features=True, rfe_scoring='f1_macro')
+
+        randf = Classification('randf', 'randf') \
+            .set_hyper_parameters(n_estimators=100,
+                                  bootstrap=True) \
             .train(training_data, prune_features=True, rfe_scoring='f1_macro')
 
         stochastic = Stochastic('stochastic')\
             .determine_distribution(training_data)
 
         evaluator = Evaluator()\
-            .evaluate(test_data, logreg, stochastic, evaluations=['roc_curves'])
+            .evaluate(test_data, randf, stochastic, evaluations=['roc_curves'])
 
-        for model in [logreg, stochastic]:
+        for model in [randf, stochastic]:
             identifier = model.name
-            auc_timelines[identifier] += [evaluator.roc_curves[identifier]['roc_auc']]
+            for label in model.classes:
+                label_str = str(label)
+                auc_timelines[label_str][identifier] += [evaluator.roc_curves[identifier][label_str]['roc_auc']]
 
         date_times += [matrix.X.index[-1]]
 
-    auc_timelines["date"] = [date_time.strftime('%Y-%m-%d') for date_time in date_times]
-    df = pd.DataFrame.from_dict(auc_timelines)
-    df = df.set_index("date")
-    df = df.T
+    # auc_timelines["date"] = [date_time.strftime('%Y-%m-%d') for date_time in date_times]
+    # df = pd.DataFrame.from_dict(auc_timelines)
+    date_times = [date_time.strftime('%Y-%m-%d') for date_time in date_times]
+    fig, axes = plt.subplots(nrows=3, ncols=1, sharex=True)
+
+    fig.set_size_inches(10, 8)
+    fig.suptitle(span + 's')
+
+    for label_idx, label in enumerate(labels):
+        ax = axes[label_idx]
+        for model in [randf, stochastic]:
+            ax.set_title('AUC for class: ' + label)
+            ax.plot(auc_timelines[label][model.name])
+
+    plt.show()
+    plt.clf()
 
 print('finish!')
