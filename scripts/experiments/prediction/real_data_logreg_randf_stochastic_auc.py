@@ -65,12 +65,16 @@ for avg in ['macro', 'micro']:
             baseline = Stochastic('baseline')\
                 .determine_distribution(training_data)
 
-            evaluator = Evaluator()\
-                .evaluate(test_data, logreg, randf, baseline, evaluations=['roc_curves'])
+            try:
+                evaluator = Evaluator()\
+                    .evaluate(test_data, logreg, randf, baseline, evaluations=['roc_curves'])
 
-            for model in [logreg, randf, baseline]:
-                identifier = model.name
-                auc_scores[identifier] += [evaluator.roc_curves[identifier]['auc_'+avg]]
+                for model in [logreg, randf, baseline]:
+                    identifier = model.name
+                    auc_scores[identifier] += [evaluator.roc_curves[identifier]['auc_'+avg]]
+            except IndexError:
+                for model in [logreg, randf, baseline]:
+                    auc_scores[identifier] += [auc_scores[identifier[-1]]]
 
             date_times += [matrix.X.index[-1]]
 
