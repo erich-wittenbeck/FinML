@@ -65,7 +65,7 @@ for span in spans:
             .determine_distribution(training_data)
 
         evaluator = Evaluator()\
-            .evaluate(test_data, randf, baseline, evaluations=['reports'])
+            .evaluate(test_data, logreg, randf, baseline, evaluations=['reports'])
 
         for model in [logreg, randf, baseline]:
             identifier = model.name
@@ -78,14 +78,20 @@ for span in spans:
 
     for model in [logreg, randf, baseline]:
         identifier = model.name
-        plt.plot(f1_scores[identifier], label=identifier, linestyle='-.')
+        color = 'red' if identifier == 'baseline' else 'blue' if identifier == 'logreg' else 'cyan'
+        plt.plot(f1_scores[identifier], label=identifier, linestyle='-.', marker='o', color=color)
+
+    plt.ylim(0.25, 0.75)
+    plt.axhline(0.5, linestyle=':', color='black')
 
     date_times = [date_time.strftime('%Y-%m-%d') for date_time in date_times]
 
     xticks = [pos for pos in range(0, len(date_times)) if pos % n[span] == 0]
     labels = [date_times[xtick] for xtick in xticks]
     plt.xticks(xticks, labels)
+    plt.ylabel('f1-score')
 
+    plt.grid(True, which='both', axis='x', linestyle='--')
     plt.legend(loc='lower right')
 
     plt.savefig('/home/files/output/png/eval/real-data/f1/real_data_eval_results_'+span+'s.png', dpi=300, bbox_inches="tight")
