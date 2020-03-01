@@ -53,7 +53,7 @@ for avg in ['macro', 'micro']:
             test_data.standardize(training_data)
 
             logreg = Classification('logreg', 'logreg') \
-                .set_hyper_parameters(C=[10 ** exp for exp in range(-1, 2)], max_iter=[20000]) \
+                .set_hyper_parameters(C=[10 ** exp for exp in range(-6, 7)], max_iter=[20000]) \
                 .configure_hpo('exhaustive', 'f1_macro', n_jobs=6, verbose=2) \
                 .train(training_data, prune_features=True, rfe_scoring='f1_macro')
 
