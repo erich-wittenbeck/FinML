@@ -74,7 +74,7 @@ for avg in ['macro', 'micro']:
                     auc_scores[identifier] += [evaluator.roc_curves[identifier]['auc_'+avg]]
             except IndexError:
                 for model in [logreg, randf, baseline]:
-                    auc_scores[identifier] += [auc_scores[identifier[-1]]]
+                    auc_scores[identifier] += [auc_scores[identifier][-1]]
 
             date_times += [matrix.X.index[-1]]
 
