@@ -5,10 +5,10 @@ from lib.utility.statistics import avg
 
 def roc_auc_multiclass_scorer(classes, average=None):
 
-    def actual_scorer(estimator, X, y):
+    def actual_scorer(model, X, y):
 
-        decision_function = estimator.decision_function if hasattr(estimator, 'decision_function') else estimator.predict_proba
-        scores = decision_function(X)
+        estimation_function = model.estimation_func
+        scores = estimation_function(X[model.features])
 
         result = 0.0
 
@@ -21,7 +21,7 @@ def roc_auc_multiclass_scorer(classes, average=None):
             for cls, cls_idx in zip(classes, range(len(classes))):
                 fpr, tpr, _ = roc_curve(y, scores[:, cls_idx], pos_label=cls)
                 aucs += [auc(fpr, tpr)]
-            result = avg(*aucs)
+            result = avg(aucs)
         elif average == 'weighted':
             support = count_class_occurences(y, classes)
             aucs = []

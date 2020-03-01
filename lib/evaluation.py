@@ -1,4 +1,5 @@
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+from lib.utility.ml import roc_auc_multiclass_scorer
 from lib.utility.visualization import *
 
 class Evaluator():
@@ -56,6 +57,11 @@ class Evaluator():
                                   'tpr' : tpr,
                                   'threshold' : threshold,
                                   'roc_auc' : roc_auc}
+        auc_macro = roc_auc_multiclass_scorer(classes, average='macro')
+        auc_micro = roc_auc_multiclass_scorer(classes, average='micro')
+
+        roc_dict['auc_macro'] = auc_macro(model, X, y)
+        roc_dict['auc_micro'] = auc_micro(model, X, y)
 
         self.__roc_curves[model.name] = roc_dict
 

@@ -229,7 +229,7 @@ class Stochastic():
         self.__distribution = train_data.y.value_counts(True).to_dict()
 
         self.__threshold = threshold
-        self.__classes = self.__distribution.keys()
+        self.__classes = list(self.__distribution.keys())
         self.__features = train_data.X.columns
 
         def predict_proba(data):
