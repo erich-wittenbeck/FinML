@@ -6,7 +6,8 @@ from matplotlib import pyplot as plt
 history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
     .upscale('60min')\
-    .slice('2012-01-01')
+    .slice('2012-01-01')\
+    .shuffle()
 
 features = Features(history) \
         .label_data('ternary', 1, 0, 0)\
@@ -92,7 +93,7 @@ for span in spans:
     plt.grid(True, which='both', axis='x', linestyle='--')
     plt.legend(loc='lower right')
 
-    plt.savefig('/home/files/output/png/eval/real-data/f1/real_data_eval_results_'+span+'s.png', dpi=300, bbox_inches="tight")
+    plt.savefig('/home/files/output/png/eval/random-data/f1/real_data_eval_results_'+span+'s.png', dpi=300, bbox_inches="tight")
     plt.clf()
 
 print('finish!')
