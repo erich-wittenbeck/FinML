@@ -35,12 +35,12 @@ features = Features(history) \
 
 
 
-spans = ['year', 'quarter', 'month']
+spans = ['month'] # 'year', 'quarter',
 n = {'year': 1, 'quarter': 4, 'month': 12}
 
 labels = ['-1', '0', '1']
 
-for avg in ['macro', 'micro']:
+for avg in ['micro']: # 'macro',
     for span in spans:
         auc_scores = {identifier: [] for identifier in ['logreg', 'randf', 'baseline']}
         date_times = []
