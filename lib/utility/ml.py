@@ -13,13 +13,22 @@ def roc_auc_multiclass_scorer(classes, average=None):
         result = 0.0
 
         if average == 'micro':
-            y_bin = label_binarize(y, classes)
-            fpr, tpr, _ = roc_curve(y_bin.ravel(), scores.ravel())
-            result = auc(fpr, tpr)
+            if len(classes) > 2:
+                y_bin = label_binarize(y, classes)
+                fpr, tpr, _ = roc_curve(y_bin.ravel(), scores.ravel())
+                result = auc(fpr, tpr)
+            else:
+                pos_class = classes[1]
+                neg_class = classes[0]
+                fpr, tpr, _ = roc_curve(y.apply(lambda val: pos_class if val == pos_class else neg_class), scores, pos_label=pos_class)
         elif average == 'macro':
             aucs = []
             for cls, cls_idx in zip(classes, range(len(classes))):
-                fpr, tpr, _ = roc_curve(y, scores[:, cls_idx], pos_label=cls)
+                if len(classes) > 2:
+                    scores_cls = scores[:, cls_idx]
+                else:
+                    scores_cls = scores
+                fpr, tpr, _ = roc_curve(y, scores_cls, pos_label=cls)
                 aucs += [auc(fpr, tpr)]
             result = avg(aucs)
         elif average == 'weighted':

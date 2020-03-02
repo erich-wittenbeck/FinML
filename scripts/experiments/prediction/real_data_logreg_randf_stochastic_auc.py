@@ -53,7 +53,7 @@ for avg in ['macro', 'micro']:
             test_data.standardize(training_data)
 
             logreg = Classification('logreg', 'logreg') \
-                .set_hyper_parameters(C=[10 ** exp for exp in range(-6, 7)], max_iter=[20000]) \
+                .set_hyper_parameters(C=[10**exp for exp in range(-6,7)]) \
                 .configure_hpo('exhaustive', 'f1_macro', n_jobs=6, verbose=2) \
                 .train(training_data, prune_features=True, rfe_scoring='f1_macro')
 
@@ -72,9 +72,10 @@ for avg in ['macro', 'micro']:
                 for model in [logreg, randf, baseline]:
                     identifier = model.name
                     auc_scores[identifier] += [evaluator.roc_curves[identifier]['auc_'+avg]]
-            except IndexError:
+            except (ValueError, IndexError) as e:
                 for model in [logreg, randf, baseline]:
-                    auc_scores[identifier] += [auc_scores[identifier][-1]]
+                    identifier = model.name
+                    auc_scores[identifier] += [0.5]
 
             date_times += [matrix.X.index[-1]]
 
@@ -100,6 +101,7 @@ for avg in ['macro', 'micro']:
         plt.legend(loc='lower right')
 
         plt.savefig('/home/files/output/png/eval/real-data/auc/real_data_eval_results_auc_' + avg + '_' + span + 's.png', dpi=300, bbox_inches="tight")
+        # plt.show()
         plt.clf()
 
 print('finish!')
