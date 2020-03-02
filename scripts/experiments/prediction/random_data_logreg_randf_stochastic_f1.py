@@ -93,7 +93,7 @@ for span in spans:
     plt.grid(True, which='both', axis='x', linestyle='--')
     plt.legend(loc='lower right')
 
-    plt.savefig('/home/files/output/png/eval/random-data/f1/real_data_eval_results_'+span+'s.png', dpi=300, bbox_inches="tight")
+    plt.savefig('/home/files/output/png/eval/random-data/f1/random_data_eval_results_'+span+'s.png', dpi=300, bbox_inches="tight")
     plt.clf()
 
 print('finish!')
