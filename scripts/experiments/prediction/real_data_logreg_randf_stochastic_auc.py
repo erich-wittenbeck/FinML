@@ -35,12 +35,12 @@ features = Features(history) \
 
 
 
-spans = ['month'] # 'year', 'quarter',
+spans = ['year', 'quarter', 'month'] #
 n = {'year': 1, 'quarter': 4, 'month': 12}
 
 labels = ['-1', '0', '1']
 
-for avg in ['micro']: # 'macro',
+for avg in ['macro', 'micro']: # ,
     for span in spans:
         auc_scores = {identifier: [] for identifier in ['logreg', 'randf', 'baseline']}
         date_times = []
@@ -75,7 +75,7 @@ for avg in ['micro']: # 'macro',
             except (ValueError, IndexError) as e:
                 for model in [logreg, randf, baseline]:
                     identifier = model.name
-                    auc_scores[identifier] += [0.5]
+                    auc_scores[identifier] += [auc_scores[identifier][-1]]
 
             date_times += [matrix.X.index[-1]]
 
