@@ -23,7 +23,7 @@ def moving_average_convergence_divergence(df, column='close', short=12, long=26,
     else:
         return signal_line
 
-def triple_exponential_moving_average(df, column='close', lookback_trix=14, lookback_signal=9):
+def triple_exponential_moving_average(df, column='close', lookback_trix=14, lookback_signal=9, return_as='delta'):
 
     values = df[column]
 
@@ -35,7 +35,12 @@ def triple_exponential_moving_average(df, column='close', lookback_trix=14, look
     trix = 100 * (triple_ema - triple_ema_prev)/(triple_ema_prev)
     signal = ema(trix, lookback_signal)
 
-    return signal - trix
+    if return_as == 'delta':
+        return signal - trix
+    elif return_as == 'main':
+        return trix
+    else:
+        return signal
 
 def average_directional_index(df, lookback=14):
 

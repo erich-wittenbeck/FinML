@@ -53,6 +53,12 @@ def bollinger_bands(df, column='close', lookback=14, return_as='total_delta'):
         return uband - mband
     elif return_as == 'lower_delta':
         return mband - lband
+    elif return_as == 'upper_band':
+        return uband
+    elif return_as == 'lower_band':
+        return lband
+    elif return_as == 'middle_band':
+        return mband
     else:
         raise ValueError("return_as: expected to be either 'total_delta', 'upper_delta' or 'lower_delta', but was " + str(return_as) + " instead!")
 
@@ -72,5 +78,11 @@ def keltner_channel(df, column='close', lookback=14, return_as='total_delta'):
         return uband - mband
     elif return_as == 'lower_delta':
         return mband - lband
+    elif return_as == 'upper_band':
+        return uband
+    elif return_as == 'lower_band':
+        return lband
+    elif return_as == 'middle_band':
+        return mband
     else:
         raise ValueError("return_as: expected to be either 'total_delta', 'upper_delta' or 'lower_delta', but was " + str(return_as) + " instead!")

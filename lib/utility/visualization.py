@@ -29,6 +29,9 @@ def plot_candlesticks(ax, chart_df):
     ax.bar(x=x_coords, height=height_wax, bottom=bottom_wax, color=colors)
     ax.bar(x=x_coords, height=height_wick, bottom=bottom_wick, width=0.15, color=colors)
 
+    xticklabels = [date_time.strftime('%Y-%m-%d') for date_time in chart_df.index]
+    ax.set_xticklabels(xticklabels, rotation=45)
+
     ax.set_ylim(ylim_min, ylim_max)
     ax.set_ylabel('Prices')
 
