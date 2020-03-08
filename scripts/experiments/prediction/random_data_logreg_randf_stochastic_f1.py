@@ -7,7 +7,7 @@ history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
     .fill_missing_data('min', 'interpolate')\
     .upscale('60min')\
     .slice('2012-01-01')\
-    .shuffle()
+    .randomize()
 
 features = Features(history) \
         .label_data('ternary', 1, 0, 0)\

@@ -121,6 +121,26 @@ class Chart():
         return Chart(self.__data.sample(frac=1, replace=with_replacement).set_index(index)) if how_many == 1\
             else tuple(Chart(self.__data.sample(frac=1, replace=with_replacement).set_index(index)) for i in range(how_many))
 
+    def randomize(self):
+        df = self.__data
+        pctchg_df = df.pct_change().fillna(0).sample(frac=1, replace=True)
+
+        new_columns = {}
+        len_df = len(df)
+        seed = df.iloc[0]
+
+        for column in df.columns:
+            new_column = [seed[column]]
+            for i in range(1, len_df):
+                prev_val = new_column[i-1]
+                new_val = prev_val + (prev_val/100)*pctchg_df.iloc[i][column]
+                new_column += [new_val]
+            new_columns[column] = new_column
+
+        return Chart(pd.DataFrame(new_columns, index=df.index))
+
+
+
     # Accessing functions
 
     def slice(self, start, end=None):
