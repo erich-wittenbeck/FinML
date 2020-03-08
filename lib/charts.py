@@ -130,14 +130,17 @@ class Chart():
         seed = df.iloc[0]
 
         for column in df.columns:
-            new_column = [seed[column]]
-            for i in range(1, len_df):
-                prev_val = new_column[i-1]
-                new_val = prev_val + (prev_val/100)*pctchg_df.iloc[i][column]
-                new_column += [new_val]
-            new_columns[column] = new_column
+            if column == 'volume':
+                new_columns['volume'] = df['volume'] #[df.iloc[i]['volume'] for i in range(0, len_df)]
+            else:
+                new_column = [seed[column]]
+                for i in range(1, len_df):
+                    prev_val = new_column[i-1]
+                    new_val = prev_val + (prev_val/100)*pctchg_df.iloc[i][column]
+                    new_column += [new_val]
+                new_columns[column] = new_column
 
-        return Chart(pd.DataFrame(new_columns, index=df.index))
+        return Chart(pd.DataFrame(new_columns, index=df.index).fillna(method='bfill'))
 
 
 
