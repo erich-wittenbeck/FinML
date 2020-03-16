@@ -73,6 +73,6 @@ for span in spans:
         statistic, pvalue = wilcoxon(f1_model, f1_baseline)
         wil_dict[identifier][span] = pvalue
 
-table = pd.DataFrame(wil_dict).to_latex(buf='/home/files/output/latex/feature_selection_rfe_logreg.txt')
+table = pd.DataFrame(wil_dict).to_latex(buf='/home/files/output/latex/real_data_wilcoxon_f1.txt')
 
 print('finish!')
