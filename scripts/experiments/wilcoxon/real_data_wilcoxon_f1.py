@@ -33,7 +33,7 @@ features = Features(history) \
                         Indicator('adl', 'adl'))
 
 
-spans = ['year']#, 'quarter', 'month']
+spans = ['year', 'quarter', 'month']
 wil_dict = {identifier: {} for identifier in ['logreg', 'randf']}
 
 for span in spans:
