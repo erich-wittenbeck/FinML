@@ -39,7 +39,7 @@ wil_dict_f1, wil_dict_auc = ({identifier: {} for identifier in ['logreg', 'randf
 
 for span in spans:
     f1_scores = {identifier: [] for identifier in ['logreg', 'randf', 'baseline']}
-    auc_scores = {identifier: [] for identifier in ['logreg', 'randf', 'baseline']}
+    # auc_scores = {identifier: [] for identifier in ['logreg', 'randf', 'baseline']}
 
     matrices = features.split(span)
 
@@ -63,35 +63,35 @@ for span in spans:
 
         evaluator_f1 = Evaluator()\
             .evaluate(test_data, logreg, randf, baseline, evaluations=['reports'])
-
-        try:
-            evaluator_auc = Evaluator() \
-                .evaluate(test_data, logreg, randf, baseline, evaluations=['roc_curves'])
-        except (ValueError, IndexError) as e:
-            evaluator_auc = None
+        #
+        # try:
+        #     evaluator_auc = Evaluator() \
+        #         .evaluate(test_data, logreg, randf, baseline, evaluations=['roc_curves'])
+        # except (ValueError, IndexError) as e:
+        #     evaluator_auc = None
 
         for model in [logreg, randf, baseline]:
             identifier = model.name
             f1_scores[identifier] += [evaluator_f1.reports[identifier]['macro avg']['f1-score']]
-            if evaluator_auc is not None:
-                auc_scores[identifier] += [evaluator_auc.roc_curves[identifier]['auc_macro']]
-            else:
-                auc_scores[identifier] += [auc_scores[identifier][-1]]
+            # if evaluator_auc is not None:
+            #     auc_scores[identifier] += [evaluator_auc.roc_curves[identifier]['auc_macro']]
+            # else:
+            #     auc_scores[identifier] += [auc_scores[identifier][-1]]
 
     f1_baseline = f1_scores['baseline']
-    auc_baseline = auc_scores['baseline']
+    # auc_baseline = auc_scores['baseline']
 
     for identifier in ['logreg', 'randf']:
         f1_model = f1_scores[identifier]
-        auc_model = auc_scores[identifier]
+        # auc_model = auc_scores[identifier]
 
         statistic, pvalue = wilcoxon(f1_model, f1_baseline)
         wil_dict_f1[identifier][span] = pvalue
 
-        statistic, pvalue = wilcoxon(auc_model, auc_baseline)
+        # statistic, pvalue = wilcoxon(auc_model, auc_baseline)
         wil_dict_auc[identifier][span] = pvalue
 
 table_f1 = pd.DataFrame(wil_dict_f1).to_latex(buf='/home/files/output/latex/random_data_wilcoxon_f1.txt')
-table_auc = pd.DataFrame(wil_dict_auc).to_latex(buf='/home/files/output/latex/random_data_wilcoxon_auc.txt')
+# table_auc = pd.DataFrame(wil_dict_auc).to_latex(buf='/home/files/output/latex/random_data_wilcoxon_auc.txt')
 
 print('finish!')
