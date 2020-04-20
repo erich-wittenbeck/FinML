@@ -1,5 +1,5 @@
 
-from api import *
+from finml import *
 
 from matplotlib import pyplot as plt
 

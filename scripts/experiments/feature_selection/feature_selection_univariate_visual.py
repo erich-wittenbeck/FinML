@@ -1,5 +1,5 @@
 
-from api import *
+from finml import *
 from lib.indicators.dummy import random_standard_variable as baseline
 
 import numpy as np

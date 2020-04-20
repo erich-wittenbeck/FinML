@@ -1,5 +1,5 @@
 
-from api import *
+from finml import *
 from scipy.stats import wilcoxon
 
 history = Chart('/home/files/charts/btc_usd_jan2012-jun2018.csv') \
