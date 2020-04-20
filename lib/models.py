@@ -20,7 +20,7 @@ hpo_metrics = {}
 
 # Actual classes
 
-class Manual():
+class Strategy():
 
     def __init__(self, name, code, result_var='__signal__'):
 

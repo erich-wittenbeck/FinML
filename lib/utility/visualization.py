@@ -107,7 +107,8 @@ def plot_confustion_matrix(ax, confusion_matrix, classes):
 def plot_roc_curves(ax, roc_dict):
 
     for cls, roc_curve in roc_dict.items():
-        ax.plot(roc_curve['fpr'], roc_curve['tpr'], label='Class: '+str(cls)+'; AUC %0.2f' % roc_curve['roc_auc'])
+        if cls != 'auc_macro' and cls != 'auc_micro':
+            ax.plot(roc_curve['fpr'], roc_curve['tpr'], label='Class: '+str(cls)+'; AUC %0.2f' % roc_curve['roc_auc'])
 
     ax.plot([0, 1], [0, 1], color='navy', linestyle='--')
     ax.set_xlim([0.0, 1.0])
