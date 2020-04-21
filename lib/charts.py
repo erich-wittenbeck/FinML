@@ -57,8 +57,19 @@ indicator_funcs = {'macd' : macd,
 
 
 class Chart():
+    """
+    Class that represents an OHLCV-price chart, also known as a '(Japanese) candlestick chart.
+
+    Properties:
+        data: The underlying pandas dataframe, indexed using pandas timestamps and containing 5 columns: open, high, low, close and volume
+    """
 
     def __init__(self, data_source):
+        """
+        Constructor for Chart-class.
+
+        :param data_source: A dataframe, or path to a .csv-file as a string. Dataframe must be indexed with pandas timestamps, while the .csv-file ought to have a column 'timestamp' containing Unix-timestamps.
+        """
 
         chart = None
 
@@ -84,6 +95,14 @@ class Chart():
     # Transformatory functions
 
     def fill_missing_data(self, freq, fill_method, **kwargs):
+        """
+        Pre-processing method for dealing with missing values in a chart.
+
+        :param freq: Frequency of the candlesticks, as a pandas frequency string.
+        :param fill_method: Method for filling up missing values. 'ffill' for forward-fill, or 'interpolate' for interpolation
+        :param kwargs: Other keyword arguments for the underlying pandas filling methods
+        :return: The Chart-instance, with missing values filled in
+        """
         chart = self.__data
 
         chart = chart.reindex(pd.date_range(start=chart.index[0], end=chart.index[-1], freq=freq))
@@ -100,6 +119,13 @@ class Chart():
         return self
 
     def upscale(self, scale):
+        """
+        Method for scaling up the size of the candlesticks contained in the Chart-instance.
+
+        :param scale: The new scale of the candlesticks, as a pandas frequency string
+        :return: The Chart-instance, with rescaled candlesticks
+        """
+
         chart = self.__data
 
         chart = chart.resample(scale) \
@@ -115,13 +141,13 @@ class Chart():
 
     # Generatvie functions
 
-    def shuffle(self, how_many=1, with_replacement=False):
-        index = self.__data.index
-
-        return Chart(self.__data.sample(frac=1, replace=with_replacement).set_index(index)) if how_many == 1\
-            else tuple(Chart(self.__data.sample(frac=1, replace=with_replacement).set_index(index)) for i in range(how_many))
-
     def randomize(self):
+        """
+        Creates a new Chart-instance containing a random walk, using this instance as a basis
+
+        :return: A new Chart-instance, with a randomized price history
+        """
+
         df = self.__data
         pctchg_df = df.pct_change().fillna(0).sample(frac=1, replace=True)
 
@@ -147,27 +173,61 @@ class Chart():
     # Accessing functions
 
     def slice(self, start, end=None):
+        """
+        Slices up a new Chart-instance from this instance, from one timestamp to the other. Timestamps are passed as strings, formatted
+
+        YYYY-MM-DD hh:mm:ss
+
+        However, only the year-portion is mandatory. If the hours, day or month are ommitted, it will default to 00:00:00 at the first day of the first month of the given year.
+
+        :param start: A string specifying the starting timestamp of the slice
+        :param end: Optional. A string specifying the final timestamp of the slice. If None, slice will go up until last timestamp of original instance
+        :return: A Chart-instance, containing only the specified slice of the original chart.
+        """
         chart_slice = slice_timeseries(self.__data, start, end)
 
         return Chart(chart_slice)
 
     def split(self, chunk_size):
+        """
+        Splits up the Chart-instance into multiple instances, each covering a certain time span of the original.
+
+        :param chunk_size: The size of the individual chunks. If a string, can be 'weeks', 'months', 'quarters' and 'years'. If a float between 0 and 1, indicates the percentage size of the first and second chunks
+        :return: A tuple of new Chart-instances
+        """
         chart_splits = split_timeseries(self.__data, chunk_size)
 
         return tuple([Chart(split) for split in chart_splits])
 
     def copy(self, no_of_copies=1):
+        """
+        Create one or more copies of this Chart-instance.
+
+        :param no_of_copies: Optional, the number of copies to be created. Default 1
+        :return: A tuple containing the copied instances, even if it is only one.
+        """
         return Chart(self.__data.copy()) if no_of_copies == 1 \
             else tuple(Chart(self.__data.copy()) for i in range(no_of_copies))
 
     # I/O
 
     def save_as(self, filename):
+        """
+        Saves the innder dataframe of the Chart-instance to a file
+
+        :param filename: The path to the target file
+        """
         self.__data.to_csv(filename)
 
     # Plotting
 
     def plot(self, from_date=None, to_date=None):
+        """
+        Plots the Chart or a segment of it, using matplotlib. Starting- and end-points are specified the same way as with Chart.slice
+
+        :param from_date: Optional, starting timestamp as a string.
+        :param to_date: Optional, ending timestamp as a string
+        """
 
         chart_df = None
 
@@ -189,8 +249,25 @@ class Chart():
     data = property(__get_data)
 
 class Features():
+    """
+    A class representing the feature matrix computed over a candlestick chart.
+
+    Attributes:
+        chart: The underlying Chart-instance
+        X: The pandas dataframe containing the features. Indexed over the same timestamps as the underlying chart
+        y: The pandas series containing the labels for each candle. Indexed over the same timestamps as the underlying chart
+        dist: A tuple of two pandas series, indexed over the column (feature) names of X. The first contains the mean for each feature, the other one the variances.
+        minmax: A tuple of two pandas series, indexed over the column (feature) names of X. The first contains the minimum of each feature, the other one the maximums.
+    """
 
     def __init__(self, data, feature_matrix=None):
+        """
+        Constructor for the Features-class.
+
+        :param data: A Chart-instance
+        :param feature_matrix: Optional. A Features-instance. If given, has to have the same index as the Chart-instance
+        """
+
         if type(data) == Chart:
             self.__chart = data.data
         elif type(data) == pd.DataFrame:
@@ -237,6 +314,15 @@ class Features():
     # Public access points for adding labels and features
 
     def label_data(self, with_func, *args, **kwargs):
+        """
+        Creates the labels for the underlying chart using a function. The function must take a pandas dataframe as first input and return a pandas series,
+        indexed over the same timestamps as the dataframe, as output. The dataframe has the structure as specified in the Chart-class.
+
+        :param with_func: The function for creating the labels, either a callable or a string. If string, it must refer to one of the built-in labeling functions.
+        :param args: Further arguments to the labeling function
+        :param kwargs: Further keyword argument to the labeling function
+        :return: A pandas series.
+        """
 
         label_func = label_funcs[with_func] \
             if type(with_func) == str \
@@ -249,6 +335,14 @@ class Features():
         return self
 
     def add_chart_columns(self, *columns, smooth_with_alpha=None):
+        """
+        Add one of the OHLCV-columns of the underlying chart as a feature.
+
+        :param columns: One or more column names as strings
+        :param smooth_with_alpha: Optional. Float between 0 and 1, used as alpha for an exponential smoothing for the chosen columns
+        :return: The Features-instance with new features
+        """
+
         list_of_columns = list(columns)
         chart = self.__chart[list_of_columns]
 
@@ -260,6 +354,14 @@ class Features():
         return self
 
     def add_indicators(self, *indicator, smooth_chart_columns=None, alpha=1):
+        """
+        Adds technical indicators as features to the feature matrix.
+
+        :param indicator: One or more Indicator-instances.
+        :param smooth_chart_columns: Optional. A list of strings, containing the names of the OHLCV-columns that will be smoothed before passing them to the indicators
+        :param alpha: Optional. If smooth_chart_columns is given, specifies the alpha of the exponential smoothing. Default 1
+        :return: The Features-instance with new features
+        """
 
         chart = self.__chart.copy()
 
@@ -276,6 +378,12 @@ class Features():
         return self
 
     def add_predictions(self, *models):
+        """
+        Adds the label predictions of predictive models as features.
+
+        :param models: One or more objects implementing the model-protocol.
+        :return: The Features-instance with new features
+        """
 
         X = self.__feature_matrix
 
@@ -289,6 +397,13 @@ class Features():
     # Feature transformation
 
     def standardize(self, with_params_of=None):
+        """
+        Standardizes the features in the feature matrix to each have a mean of 0 and variance of 1.
+
+        :param with_params_of: Optional. A Features-instance whose dist-property will be used for the computation
+        :return: The Features-instance with standardized features
+        """
+
         X = self.__get_X()
         features = X.columns
 
@@ -303,6 +418,12 @@ class Features():
         return self
 
     def normalize(self, with_params_of):
+        """
+        Normalizes the values for each feature in the feature matrix between 0 and 1.
+
+        :param with_params_of: Optional. A Features-instance whose minmax-property will be used for the computation
+        :return: The Features-instance with normalized features
+        """
         X = self.__get_X()
         features = X.columns
 
@@ -316,6 +437,15 @@ class Features():
         return self
 
     def rolling_window(self, offset, periods, *features):
+        """
+        Creates rolling windows of the existing features and adds them to the matrix. The new features' names are their old ones,
+        appended with '__t-n', where 'n' is the number of shifts in relation to the original chart.
+
+        :param offset: Initial offset as positive integer
+        :param periods: The number of periods for which rolling windows are created.
+        :param features: One or more strings, containing the feature names from which rolling windows are to be created
+        :return: The Features-instance with new features
+        """
 
         to_be_shifted = self.__get_X()[list(features)] if features != () else self.__get_X()
 
@@ -329,6 +459,13 @@ class Features():
     # Feature selection
 
     def prune_features(self, n, score_func=f_classif): # TODO Use built_in string!
+        """
+        Implements univariate feature selection, pruning all but the n most relevant features.
+
+        :param n: The number of relevant features to be selected
+        :param score_func: Optional. The scoring function for testing relevance of features. Default is f_classif-function from Scikit-Learn
+        :return: The Features-instance with only n features now
+        """
 
         X = self.__get_X()
         y = self.__get_y()
@@ -356,6 +493,13 @@ class Features():
     # Accessing functions
 
     def slice(self, start, end=None):
+        """
+        Works analogously to the slice-method of the Chart-class.
+
+        :param start: see above
+        :param end: see above
+        :return: A Features-instance
+        """
 
         chart_slice = slice_timeseries(self.__chart, start, end)
 
@@ -364,6 +508,12 @@ class Features():
         return Features(chart_slice, feature_slice)
 
     def split(self, chunk_size):
+        """
+        Works analogously to the split-method of the Chart-class.
+
+        :param chunk_size: see above
+        :return: A tuple of Features-instances
+        """
 
         split_chart = split_timeseries(self.__chart, chunk_size)
 
@@ -372,6 +522,12 @@ class Features():
         return tuple([Features(chart_slice, features_slice) for chart_slice, features_slice in zip(split_chart, split_features)])
 
     def copy(self, no_of_copies=1):
+        """
+        Works analogously to the copy-mtehod of the Chart-class.
+
+        :param no_of_copies: see above
+        :return: A tuple of Features-instances
+        """
 
         copied_chart = self.__chart.copy()
 
@@ -390,8 +546,18 @@ class Features():
 
 
 class Indicator():
+    """
+    A class of callable objects that wrap around technical indicator-functions, in order to modify them and give context
+    """
 
     def __init__(self, identifier, func, **params):
+        """
+        Constructor method.
+
+        :param identifier: The string identifier for the Indicator. This will be the name under which it will be added inside a Features-instance
+        :param func: The technical indicator. Must be a string referencing one of the built-in indicators or a callable. An indicator must fulfill the same protocoll as a labeling function for the Features-instance
+        :param params: Additional keyword arguments for the indicator-function
+        """
 
         func = indicator_funcs[func] \
             if type(func) == str \
@@ -406,6 +572,12 @@ class Indicator():
         return {identifier: result}
 
     def rescale(self, scaling):
+        """
+        Set rescaling of the chart before computing the indicator.
+
+        :param scaling: The new candlesize the chart is to be rescaled to. A pandas frequency string
+        :return: The Indicator-instance
+        """
 
         old_func = self.__func
 
@@ -424,6 +596,13 @@ class Indicator():
         return self
 
     def smooth_chart(self, alpha, *chart_columns):
+        """
+        Set smoothing of the chart before computing the indicator.
+
+        :param alpha: The alpha for the exponential smoothing. Float between 0 and 1
+        :param chart_columns: The names of the chart columns to be smoothed, as strings
+        :return: The Indicator-instance
+        """
 
         old_func = self.__func
 
