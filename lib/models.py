@@ -21,8 +21,23 @@ hpo_metrics = {}
 # Actual classes
 
 class Strategy():
+    """
+    A class implementing predictive models manually created by a human using python code.
+
+    The python code can reference the features of a feature matrix by using their names as variable identifiers
+
+    Attributes:
+        name: The string identifier for this model
+    """
 
     def __init__(self, name, code, result_var='__signal__'):
+        """
+        Constructor method.
+
+        :param name: The string identifier for this model
+        :param code: The pythond code, as a string
+        :param result_var: Optional. The name of the variable which will store the prediction result inside the code. Default '__signal__'
+        """
 
         self.__name = name
         self.__result_var = result_var
@@ -36,6 +51,12 @@ class Strategy():
     """ Execute """
 
     def predict(self, input):
+        """
+        Predict the labels for a given feature matrix
+
+        :param input: Either a Features-instance or the X-attribute of a Features-instance
+        :return: A pandas series containing the predictions for each instance in the input. Indexed over the same timestamps as the input
+        """
 
         # Local function to apply strategy on a per row/series basis
 
@@ -55,8 +76,24 @@ class Strategy():
     name = property(__get_name)
 
 class Classification():
+    """
+    A class implementing predictive models using machine learning algorithms.
+
+    Attributes:
+        name: The string identifier for this instance
+        params: The parameters of the model, as a dictionary
+        classes: The classes/labels predicted by the model, as a numpy array
+        features: The features used by the model, as a list of strings
+        estimation_func: The underlying estimation function of the model. Either it's 'decision_function' or 'predict_proba'
+    """
 
     def __init__(self, name, algorithm):
+        """
+        Constructor method.
+
+        :param name: The string identifier of the model
+        :param algorithm: The machine learning algorithm. Either a class implementing Scikit-Learn's Predictor-protocol or a string referencing one of the built-in models.
+        """
 
         self.__features = []
         self.__name = name
@@ -95,6 +132,12 @@ class Classification():
         return self.__classifier.classes_
 
     def set_hyper_parameters(self, **hyper_params):
+        """
+        Set the hyper parameters of the learning process.
+
+        :param hyper_params: The hyper parameters of the underlying ml algorithm as keyword arguments. Each argument may be passed either a scalar value or a list of scalars.
+        :return: The Classification-instance with hyper parameters set.
+        """
 
         self.__hpo_config = {} # Reset HPO configuration
         self.__hyper_params = hyper_params
@@ -104,6 +147,14 @@ class Classification():
         return self
 
     def configure_hpo(self, hpo_method, scoring_metric, **hpo_configs):
+        """
+        Configures hyper parameter optimization, if at least one of the parameters in set_hyper_parameters was passed a list of values.
+
+        :param hpo_method: Sets the HPO method. Either 'exhaustive' or 'random'
+        :param scoring_metric: The metric with which model performance is evaluated. A legal value for the 'scoring'-parameter of Scikit-Learn's GridSearchCV
+        :param hpo_configs: Keyword arguments for Scikit-Learn's GridSearchCV
+        :return: The Classification-instance with configured HPO
+        """
 
         scoring = hpo_metrics[scoring_metric] \
             if scoring_metric in hpo_metrics \
@@ -120,12 +171,19 @@ class Classification():
 
         return self
 
-    def train(self, training_data, *features, prune_features=False, k=None, rfe_folds=None, rfe_scoring=None):
+    def train(self, training_data, prune_features=False, k=None, rfe_folds=None, rfe_scoring=None):
+        """
+        Trains the actual model.
+
+        :param training_data: A Features-instance.
+        :param prune_features: Optional. Set if recursive feature elimination is to be performed. Default False
+        :param k: Optional. Limits the number of features to be selected to k. Positive integer
+        :param rfe_folds: Optional. Number of folds to be used during RFE. Positive integer.
+        :param rfe_scoring: Optional. Scoring metric used for RFE. String or callable
+        :return: The Classification-instance with learned model
+        """
 
         X, y = training_data.X, training_data.y
-
-        if not prune_features and len(features) > 0:
-            X = X[list(features)]
 
         algorithm = self.__algorithm
         hyper_params = self.__hyper_params
@@ -165,6 +223,12 @@ class Classification():
         return self
 
     def predict(self, input):
+        """
+        Predict labels for a given input feature matrix.
+
+        :param input: A Features-instance or a pandas series or dataframe
+        :return: A pandas series containing the predictions for the input instances.
+        """
 
         X = input if type(input) in [pd.Series, pd.DataFrame] \
             else input.X
@@ -185,8 +249,23 @@ class Classification():
     estimation_func = property(__get_estimation_func)
 
 class Stochastic():
+    """
+    A class for creating predictions based on the label distribution of the training data
+
+    Attributes:
+        name: The string identifier for this model.
+        params: The parameters of the model. Dictionary with only one entry: 'threshold', the decision threshold.
+        classes: The classes predicted by the model
+        features: The features found in the input data
+        estimation_func: The function predicting labels based on the training data's label distribution.
+    """
 
     def __init__(self, name):
+        """
+        Constructor method.
+
+        :param name: The string identifier for this instance
+        """
 
         self.__distribution = {}
 
@@ -222,6 +301,13 @@ class Stochastic():
     # Public methods
 
     def determine_distribution(self, train_data, threshold=1):
+        """
+        Determine the label distribution of the given training data.
+
+        :param train_data: A Features-instance
+        :param threshold: Optional. A probability between 0.5 and 1, if any label exceeds this threshold, only that label will be predicted. Default 1
+        :return: The Stochastic-instance
+        """
 
         if threshold <= 0.5 or threshold > 1:
             raise ValueError("threshold - value must be in (0.5, 1] but was " + str(threshold) + "!")
@@ -243,6 +329,12 @@ class Stochastic():
         return self
 
     def predict(self, input):
+        """
+        Predict labels for a given input
+
+        :param input: A Features-instance or pandas series or dataframe
+        :return: A pandas series containing the prediction for input.
+        """
 
         X = input if type(input) in [pd.Series, pd.DataFrame] \
             else input.X
