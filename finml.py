@@ -16,11 +16,23 @@ Strategy = Strategy
 Classification = Classification
 Stochastic = Stochastic
 Evaluator = Evaluator
-Simulator = Simulator
 
 class Metaparameters():
+    """
+    Utility class for creating a grid of meta parameters for an experiment and iterate over them.
+
+    Attributes:
+        zipped: An iterable of tuples, created using Python's zip built-in
+        cartesian: An iterable of tuples, created using itertools 'product'-class
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor method.
+
+        :param args: 0 or more iterables
+        :param kwargs: 0 or more iterables, passed using keywords (recommended).
+        """
 
         self.__iterables = list(args) + [kwargs[k] for k in kwargs]
 

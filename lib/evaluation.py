@@ -3,6 +3,15 @@ from lib.utility.ml import roc_auc_multiclass_scorer
 from lib.utility.visualization import *
 
 class Evaluator():
+    """
+    A class implementing logic for evaluating given models
+
+    Attributes:
+        models: A dictionary mapping string identifiers to the corresponding models
+        reports: A dictionary mapping string identifiers to their classification reports, provided by Scikit-Learn
+        confmats: A dictionary mapping string identifiers to their confusion matrices, provided by Scikit-Learn
+        roc_curves: A dictionary mapping string identifiers to their roc_curves, in turn also dictionaries.
+    """
 
     def __init__(self):
         self.__models = {}
@@ -68,6 +77,14 @@ class Evaluator():
     # Public methods
 
     def evaluate(self, test_data, *models, evaluations=['reports', 'confmats', 'roc_curves']):
+        """
+        Creates the various evaluations for the passed set of models, against a set of test data.
+
+        :param test_data: A Features-instance
+        :param models: One or more models
+        :param evaluations: Optional. List of strings specifying, which evaluations should be conducted. Possible entries are 'reports', 'confmats' and 'roc_curves'. Default contains all three of them
+        :return: The Evaluator-instance.
+        """
 
         X, y = test_data.X, test_data.y
 
@@ -87,6 +104,14 @@ class Evaluator():
         return self
 
     def plot(self, save_as=None, *args, **kwargs):
+        """
+        Plot the created evaluations using Matplotlib
+
+        :param save_as: Optional. A filepath under which the plot ought to be saved
+        :param args: Optional. Various additional arguments to Matplotlib's 'savefig'-method.
+        :param kwargs: Optional. Various addition keyword arguments to Matplotlib's 'savefig'-method.
+        :return: The Evaluator-instance.
+        """
         nrows = sum([1 for field in [self.__classification_reports,
                                      self.__confusion_matrices,
                                      self.__roc_curves]
