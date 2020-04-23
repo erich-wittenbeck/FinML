@@ -102,3 +102,7 @@ evaluator.plot(save_as='/path/to/plot.png')
 ````
 
 Available evaluations are 'reports', 'confmats' (confusion matrices) and 'roc_curves' (ROC-analysis).
+
+# Credits
+
+Developed by Erich Wittenbeck.

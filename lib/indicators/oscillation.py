@@ -4,6 +4,14 @@ import pandas as pd
 from lib.indicators.moving_averages import simple_moving_average as sma, exponential_moving_average as ema
 
 def relative_strength_index(df, column='close', lookback=14):
+    """
+    RSI technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param column: Optional. Column upon which indicator is to be computed. Default 'close'
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     values = df[column]
 
@@ -18,6 +26,13 @@ def relative_strength_index(df, column='close', lookback=14):
     return (100 - (100/(1 + avg_gain/avg_loss))).fillna(0)
 
 def money_flow_index(df, lookback=14):
+    """
+    MFI technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -45,6 +60,13 @@ def money_flow_index(df, lookback=14):
 
 
 def williams_percent_range(df, lookback=14):
+    """
+    WPR technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -58,6 +80,14 @@ def williams_percent_range(df, lookback=14):
     return wpr
 
 def awesome_oscillator(df, short=5, long=34):
+    """
+    AO technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param short: Optional. Short look-back period. Default 5
+    :param long: Optional. Long look-back period. Default 34
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -69,6 +99,15 @@ def awesome_oscillator(df, short=5, long=34):
     return ao
 
 def ultimate_oscillator(df, short=7, medium=14, long=28):
+    """
+    UO technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param short: Optional. Short look-back period. Default 7
+    :param medium: Optiona. Medium look-back period. Default 14
+    :param long: Optional. Long look-back period. Default 28
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -96,6 +135,17 @@ def ultimate_oscillator(df, short=7, medium=14, long=28):
     return uo
 
 def stochastic_oscillator(df, lookback_k=14, lookback_d=3, return_as='k'):
+    """
+    STOCH technical indicator
+
+    Can be returned in two variants: K and D
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback_k: Optional. Look-back period for the K-line (longterm). Default 14
+    :param lookback_d: Optional. Look-back period for the D-line (shortterm). Default 3
+    :param return_as: Optional. What to return. Can be 'k' or 'd'. Default 'k'
+    :return: A pandas series
+    """
     high_values = df['high']
     low_values = df['low']
     close_values = df['close']

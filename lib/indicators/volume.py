@@ -2,6 +2,12 @@
 from lib.indicators.moving_averages import exponential_moving_average as ema
 
 def on_balance_volume(df):
+    """
+    OBV technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :return: A pandas series.
+    """
 
     close_values = df['close']
     volumes = df['volume']
@@ -20,6 +26,13 @@ def on_balance_volume(df):
     return obv
 
 def force_index(df, lookback=14):
+    """
+    FIDX technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     close_values = df['close']
     volumes = df['volume']
@@ -33,6 +46,13 @@ def force_index(df, lookback=14):
     return fidx
 
 def chaikin_money_flow(df, lookback=20):
+    """
+    CMF technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 20
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -47,6 +67,13 @@ def chaikin_money_flow(df, lookback=20):
     return cmf
 
 def accumulation_distribution_line(df, lookback=20):
+    """
+    ADL technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 20
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']

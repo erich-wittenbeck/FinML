@@ -4,7 +4,24 @@ import pandas as pd
 from lib.indicators.moving_averages import exponential_moving_average as ema
 from lib.indicators.volatility import average_true_range as atr
 
-def moving_average_convergence_divergence(df, column='close', short=12, long=26, average=9, return_as='delta'):
+def moving_average_convergence_divergence(df, column='close', short=12, long=26, medium=9, return_as='delta'):
+    """
+    MACD technical indicator.
+
+    Is returned either as
+
+    - The delta between main- and signal-line
+    - The main-line
+    - The signal-line
+
+    :param df: Chart data, as pandas dataframe
+    :param column: Optional. Column upon which indicator is to be computed. Default 'close'
+    :param short: Optional. Short look-back period. Default 12
+    :param long: Optional. Long look-back period. Default 26
+    :param medium: Optional. Medium look-back period. Default 9
+    :param return_as: Optional. How to return the indicator. Can be 'delta', 'main' or 'signal'. Default 'delta'
+    :return: A pandas series
+    """
 
     values = df[column]
 
@@ -14,7 +31,7 @@ def moving_average_convergence_divergence(df, column='close', short=12, long=26,
 
     # The lines calculated from the EMAs
     main_line = short_ema - long_ema
-    signal_line = ema(main_line, average)
+    signal_line = ema(main_line, medium)
 
     if return_as == 'delta':
         return signal_line - main_line
@@ -24,6 +41,22 @@ def moving_average_convergence_divergence(df, column='close', short=12, long=26,
         return signal_line
 
 def triple_exponential_moving_average(df, column='close', lookback_trix=14, lookback_signal=9, return_as='delta'):
+    """
+    TRIX technical indicator.
+
+    Is returned either as
+
+    - The delta between main- and signal-line
+    - The main-line
+    - The signal-line
+
+    :param df: Chart data, as pandas dataframe
+    :param column: Optional. Column upon which indicator is to be computed. Default 'close'
+    :param lookback_trix: Optional. The lookback-period for the main-line. Default 14
+    :param lookback_signal: Optional. The lookback-period for the signal-line. Default9
+    :param return_as: Optional. How to return the indicator. Can be 'delta', 'main' or 'signal'. Default 'delta'
+    :return: A pandas series
+    """
 
     values = df[column]
 
@@ -43,6 +76,13 @@ def triple_exponential_moving_average(df, column='close', lookback_trix=14, look
         return signal
 
 def average_directional_index(df, lookback=14):
+    """
+    ADX technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -68,6 +108,14 @@ def average_directional_index(df, lookback=14):
     return adx
 
 def vortex_indicator(df, lookback=14):
+    """
+    Vortex technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
+
     high_values = df['high']
     low_values = df['low']
     close_values = df['close']

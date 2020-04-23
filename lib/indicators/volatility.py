@@ -4,6 +4,13 @@ import pandas as pd
 from lib.indicators.moving_averages import simple_moving_average as sma, exponential_moving_average as ema
 
 def average_true_range(df, lookback=14):
+    """
+    ATR technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param lookback: Optional. Look-back period. Default 14
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -20,6 +27,14 @@ def average_true_range(df, lookback=14):
     return atr
 
 def mass_index(df, short=9, long=25):
+    """
+    AO technical indicator
+
+    :param df: Chart data, as pandas dataframe
+    :param short: Optional. Short look-back period. Default 9
+    :param long: Optional. Long look-back period. Default 25
+    :return: A pandas series
+    """
 
     high_values = df['high']
     low_values = df['low']
@@ -36,6 +51,21 @@ def mass_index(df, short=9, long=25):
     return midx
 
 def bollinger_bands(df, column='close', lookback=14, return_as='total_delta'):
+    """
+    BBANDS technical indicator.
+
+    Can be returned as
+
+    - Delta between upper and lower band
+    - Delta between upper and middle or middle and lower band
+    - Either of the three bands
+
+    :param df: Chart data, as pandas dataframe
+    :param column: Optional. Column upon which indicator is to be computed. Default 'close'
+    :param lookback: Optional. Look-back period. Default 14
+    :param return_as: Optional. How to return the indicator. Can be 'total_delta', 'upper_delta', 'lower_delta', 'upper_band', 'middle_band' and 'lower_band'. Default 'total_delta'
+    :return: A pandas series.
+    """
 
     values = df[column]
 
@@ -63,6 +93,21 @@ def bollinger_bands(df, column='close', lookback=14, return_as='total_delta'):
         raise ValueError("return_as: expected to be either 'total_delta', 'upper_delta' or 'lower_delta', but was " + str(return_as) + " instead!")
 
 def keltner_channel(df, column='close', lookback=14, return_as='total_delta'):
+    """
+    KLTCH technical indicator.
+
+    Can be returned as
+
+    - Delta between upper and lower band
+    - Delta between upper and middle or middle and lower band
+    - Either of the three bands
+
+    :param df: Chart data, as pandas dataframe
+    :param column: Optional. Column upon which indicator is to be computed. Default 'close'
+    :param lookback: Optional. Look-back period. Default 14
+    :param return_as: Optional. How to return the indicator. Can be 'total_delta', 'upper_delta', 'lower_delta', 'upper_band', 'middle_band' and 'lower_band'. Default 'total_delta'
+    :return: A pandas series.
+    """
 
     values = df[column]
 
