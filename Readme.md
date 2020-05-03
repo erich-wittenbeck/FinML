@@ -92,8 +92,8 @@ Models are evaluated using the *Evaluator*-class:
 evaluator = Evaluator().evaluate(test_data, logreg, randf, evaluations=['reports'])
 ````
 
-This passes a set of test data alongside two trained models to the evaluator and let's it create a Scikit-Learn
-classification report.
+This passes a set of test data alongside two trained models to the evaluator and makes it create a Scikit-Learn
+classification report for each of them.
 
 It can be plotted using matplotlib via
 
